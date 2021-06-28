@@ -1,77 +1,55 @@
-//Higher order function: function as parameter
 
-function add(a, b) {
-    return a + b;
+let printEmployee = (employee) => {
+    console.log(`id : ${employee.id}`)
+    console.log(`name : ${employee.name}`)
+    console.log(`salary : ${employee.salary}`)
 }
-add(10, 10)
-let x = 100;
-let y = 200;
-add(x, y);
 
+printEmployee({ id: 1, name: 'subramanian', salary: 1000 })
 
-//action : is arg variable,
-function connect(servertype = '', action) {
-    if (typeof action === 'function') {
-        action(servertype);
-    } else {
-        throw Error('Wrong type')
+printEmployee = (employee) => {
+    //destructure
+    const { id, name, salary, address: { city } } = employee
+    console.log(`id : ${id}`)
+    console.log(`name : ${name}`)
+    console.log(`salary : ${salary}`)
+    console.log(`city : ${city}`)
+
+}
+printEmployee({
+    id: 1, name: 'subramanian', salary: 1000, address: {
+        city: 'Coimbatore'
     }
-}
-//parameter of function can be anything -numbers,strings...
-let webserver = function (server) {
-    console.log(server)
-}
-connect('webserver starts', webserver)
-//connect(100)
-connect('db server starts', function (server) {
-    console.log(server)
-})
-////////////////////////////////////////////////////////////////////////////////////
-
-function fetchData(success, failure) {
-    //biz logic
-    let response = 'This is Response'
-    //response=undefined
-    if (response) {
-        success(response)
-    } else {
-        failure('No data ')
-    }
-
-}
-
-fetchData(function (res) {
-    console.log(res)
-}, function (err) {
-    console.log(err)
 })
 
-//arrow version
-
-let fetch = (success, failure) => {
-    if (typeof success === 'function' && typeof failure === 'function') {
-        //biz logic
-        let response = 'This is Response'
-        //response=undefined
-        if (response) {
-            success(response)
-        } else {
-            failure('No data ')
-        }
-    } else {
-        throw Error('Wrong type')
-    }
+printEmployee = ({ id, name, salary, address: { city } }) => {
+    console.log(`id : ${id}`)
+    console.log(`name : ${name}`)
+    console.log(`salary : ${salary}`)
+    console.log(`city : ${city}`)
 
 }
-fetch(res => console.log(res), err => console.log(err))
-//fetch(100,900)
+printEmployee({
+    id: 1, name: 'subramanian', salary: 1000, address: {
+        city: 'Coimbatore'
+    }
+})
+//////////////////////////////////////////////////////////////////////////////////////
 
+let configure = (name, version, location) => {
+    return {
+        name: name,
+        version: version,
+        location: location
+    }
+}
+console.log(configure('Inventory Service', '1.0', 'http://192.3.500'))
 
+//with destructuring
+configure = (name, version, location) => ({
+    name,
+    version,
+    location
+})
 
-
-
-
-
-
-
-
+console.log(configure('Inventory Service', '1.0', 'http://192.3.500'))

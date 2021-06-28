@@ -639,20 +639,223 @@ let fetch = (success, failure) => {
 }
 fetch(res => console.log(res), err => console.log(err))
 //fetch(100,900)
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+2.Returning function from another function.
+
+function counter() {
+    console.log('outer function')
+    return function () {
+        return 'innerfunction'
+    }
+}
+let func = counter()
+console.log(func());
+
+const outer = () => {
+    console.log('outer function')
+    return () => 'innerfunction'
+};
+console.log(outer()())
+............................................................................................
+
+Object based Programming:
+
+1.class
+2.Object
+3.methods
+
+1.js does not have classes before es5. 
+  object template(class) is declared using functions.
+2.es 6 brought classes but it is still functions only.
+
+Objects :
+  new constructorCall() / functionCall()
+
+Objects can have 
+  -state,methods   : this keyword
+  -instance variables and instance methods.
+
+Object creations patterns
+
+1.constructor pattern
+   -function, class
+2.literal pattern
+
+3.factory pattern.
 
 
 
+function Employee(id = 1, name = 'Subramanian') {
+    this.id = id;
+    this.name = name;
+    this.calculateSalary = function () {
+        return 1000;
+    }
+}
+//emp is variable:reference variable
+//new is keyword
+//Employee() is constructor call
+let emp = new Employee(34, 'Karthik');
+console.log(`Id : ${emp.id} Name : ${emp.name} Salary :  ${emp.calculateSalary()}`)
+
+class Customer {
+    constructor(id = 0, name = 'defaultName') {
+        this.id = id
+        this.name = name
+    }
+    calculateInvoice() {
+        return 1000;
+    }
+}
+let cust = new Customer(2, 'ram');
+console.log(`Id : ${cust.id} Name : ${cust.name} Invoice :  ${cust.calculateInvoice()}`)
+
+//objects are created using literals
+let profile = {
+    id: 1,
+    name: 'Subramanian',
+    city: 'Coimbatore',
+    state: 'Tamil Nadu'
+}
+console.log(profile)
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+let service = {
+    name: 'GreeterService',
+    version: '1.0',
+    actions: {
+        //es 5 style
+        sayHello: function () {
+            return 'Hello'
+        },
+        //es 6 version of writing methods inside literal object
+        sayHai(name) {
+            return `Hai ${name}`;
+        }
+    }
+}
+console.log(service.name)
+console.log(service.actions.sayHello())
+console.log(service.actions.sayHai('Subramanian'))
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Hierachy: HAS,ISA,Polymorphism
+//es 6 class 
+
+class Account {
+    constructor() {
+        console.log('Account')
+    }
+    deposit() {
+        return 20;
+    }
+}
+class SavingsAccount extends Account {
+    constructor() {
+        super()
+        console.log('Savings Account')
+    }
+    deposit() {
+        return 10 * super.deposit();
+    }
+}
+let sb = new SavingsAccount()
+console.log(sb.deposit())
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 
+HAS-A 
 
+class ProductService {
+    constructor() {
 
+    }
+    findAll() {
+        return [{
+            id: 1,
+            name: 'p1'
+        },
+        {
+            id: 2,
+            name: 'p2'
+        }
+        ]
+    }
+}
+class OrderService {
 
+    constructor(productService) {
+        this.productService = productService
+    }
+    getProduct() {
+        return this.productService.findAll()
+    }
+}
+let oService = new OrderService(new ProductService());
+console.log(oService.getProduct())
+//////////////////////////////////////////////////////////////////////////////////////////
 
+Object Destructuring
+.....................
 
+Breaking object properties into readable form.
 
+let printEmployee = (employee) => {
+    console.log(`id : ${employee.id}`)
+    console.log(`name : ${employee.name}`)
+    console.log(`salary : ${employee.salary}`)
+}
 
+printEmployee({ id: 1, name: 'subramanian', salary: 1000 })
 
+printEmployee = (employee) => {
+    //destructure
+    const { id, name, salary, address: { city } } = employee
+    console.log(`id : ${id}`)
+    console.log(`name : ${name}`)
+    console.log(`salary : ${salary}`)
+    console.log(`city : ${city}`)
 
+}
+printEmployee({
+    id: 1, name: 'subramanian', salary: 1000, address: {
+        city: 'Coimbatore'
+    }
+})
+
+printEmployee = ({ id, name, salary, address: { city } }) => {
+    console.log(`id : ${id}`)
+    console.log(`name : ${name}`)
+    console.log(`salary : ${salary}`)
+    console.log(`city : ${city}`)
+
+}
+printEmployee({
+    id: 1, name: 'subramanian', salary: 1000, address: {
+        city: 'Coimbatore'
+    }
+})
+//////////////////////////////////////////////////////////////////////////////////////
+
+let configure = (name, version, location) => {
+    return {
+        name: name,
+        version: version,
+        location: location
+    }
+}
+console.log(configure('Inventory Service', '1.0', 'http://192.3.500'))
+
+//with destructuring
+configure = (name, version, location) => ({
+    name,
+    version,
+    location
+})
+
+console.log(configure('Inventory Service', '1.0', 'http://192.3.500'))
 
 
 
