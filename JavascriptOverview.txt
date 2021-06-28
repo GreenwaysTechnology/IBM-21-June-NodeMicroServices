@@ -1,0 +1,693 @@
+
+java script is pl.
+
+JS is Object based, functional style, event driven pl.
+
+Object based vs object oriented:
+................................
+
+Object Oriented Principles:
+...........................
+
+1.Abstraction
+2.Encapsulation
+3.Hierarchy
+4.Typing
+5.Modularity
+----------------------
+6.Concurrency
+7.Persistency
+
+if any language follows all oo concepts, object oriented language.
+if any language is not following any one object oriented principle or paritially implements
+that language is called as 'object based language'.
+//////////////////////////////////////////////////////////////////////////////////////////
+
+What type of apps you can build using js?
+
+Today you can use js for building any type of apps.
+
+JS created for HTML Document creation,maniupulation  language inside browser :DOM Programming.
+
+
+When js was created?
+
+In 1996, js was created by Netscap communications.
+
+When js came out for use?
+
+1996 , JS submitted to ECMA Committe.
+
+1997-> JAVA SCRIPT 1.0 -> es 1
+es 3 -1999
+es 4 -2006
+es 5 -2007
+es 6 -2012-2015. - ecma 2015
+es6 7,8,9....
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+java script, dev,execution:
+
+Java script VM/ Execution engine/Runtime
+
+-embeded
+ -inside another program :  browser
+-standalone
+ -google v8.
+////////////////////////////////////////////////////////////////////////////////////////////
+Learning path:
+
+es 6:
+
+1. java  script LANGUAGE fundamentals
+2. java script functional programming 
+3. Object based features and implementation
+.................................................................................................
+4. DOM 
+5. NETWORK Progamming - ajax
+etc....
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+JS Fundmentals
+
+-variables
+-data types
+-values
+-operators
+-control statement/structures
+-loops 
+-conditional statement.
+
+variables,data, values: data type.
+
+Based on data type:
+
+- static programming language/strongly typed programming language
+
+  if language compiler verifies , the type of variable during compile time, those languages
+are called static programming language.
+
+  int a=10;
+  a="hello" ; compile time error.
+
+
+- dynamic programming language/weakly typed programming language
+ 
+  if language compiler verifies , the type of variable during runtime time, those languages
+are called dynamic/weakly typed programming language.
+
+  var i=10
+  i="hello" // no error
+
+JS follows dynamic typed.
+
+
+1. java  script fundamentals
+
+variable,types, values.
+
+javascript is untyped/dyamic typed language.
+
+keyword variableName=value(literals)
+
+var | let | const | this | variablename=literal
+
+var-es5
+let and const -es6 to replace var.
+
+this - for object variables
+
+literals - values: based on literal only the type of variable is decided during runtime.
+
+types of literals
+
+1.string
+2.number
+3.boolean
+4.undefined
+5.nan
+6.infinity
+7.null
+8.function
+9.object
+
+types ;
+
+1.string
+2.number - number,infinity,NaN
+3.boolean
+4.undefined
+5.function
+6.object - null, object
+
+
+
+strings 
+
+1. declared using  "" ,'',``(es6)
+2. 16 bit unicode character
+
+`` - back tick notation:
+
+-string interpolation
+-multi line string literal
+
+//strings
+var firstName = "Subramanian";
+let lastName = 'Murugan';
+//string concatnation: + , `${}-string interpolation`
+console.log(" Name " + firstName + " " + lastName);
+console.log(" Name ", firstName, " ", lastName);
+//String interpolation : es 6 ;  String template literal
+console.log(`Name ${firstName} ${lastName}`);
+//multi line strings using es 5 pattern:
+let title = 'IBM'
+let doc = "<html>" +
+    "<head>" +
+    "<title>" + title + "</title>" +
+    "</head>" +
+    "<body>" +
+    "<h1>Hello</h1>" +
+    "</body>";
+console.log(doc)
+
+let docOne = `<html>
+           <head>
+            <title>${title}</title>
+            </head>
+          <body>
+            <h1>Hello</h1>
+          </body>
+        `;
+console.log(docOne)
+
+
+2.Numbers
+
+-all numbers size is 64 bit aka double.
+
+let salary = 10000;
+console.log(`Salary ${salary}`);
+let totalSalary = salary * 100
+console.log(`Total salary ${salary}`);
+
+2.boolean
+
+- 1 bit value eiether 0 or 1;
+- offers built in literal value called true/false
+
+
+3.undefined:
+ -undefined; if variable declared but not initalized with any valid literals
+
+let cost;
+console.log(`cost ${cost}`);
+
+
+4.NaN -  Not a Number
+
+ -NaN - not a number; it is numerical error code.during numerical computation, 
+
+js engine
+ -may throw error - NaN ; 
+ -NaN is not valid value, it is error , need to be fixed if you get.
+
+when you will get NaN.
+1.if you do compuation against undefined variables.
+
+//numerical computation against undefined
+let qty; //undefined
+let price = 100;
+let totalPrice = qty * price;
+console.log(`Totatl Price is ${totalPrice}`)
+
+
+2. when you do type conversion ; string to number.
+	type conversion; implict and explict.  String to Number
+
+//type conversion:implicit
+let x = "10";
+let y = 10;
+let c = x * y;
+console.log(`C ${c}`)
+
+//explicit
+let d = parseFloat(x) * y;
+console.log(`D ${d}`)
+
+//Nan and type conviersion
+x = "$20";
+c = x * y;
+console.log(`C ${c}`)
+
+d = parseFloat(x) * y;
+console.log(`D ${d}`)
+
+5.infinity
+
+-div/0 -
+
+let x =100;
+let y =0
+let c = x/y;
+console.log(`C ${c}`)
+
+How to know the runtime data type of variable?
+
+-typeof operator.
+
+let a = 10;
+console.log(`a type is ${typeof a}`);
+a = 'Hello';
+console.log(`a type is ${typeof a}`);
+a = true;
+console.log(`a type is ${typeof a}`);
+a = undefined;
+console.log(`a type is ${typeof a}`);
+a = 10 * undefined; //NaN --->number type
+console.log(`a type is ${typeof a}`);
+a = 100 / 0;
+console.log(`a type is ${typeof a}`);
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Advanced boolean :
+...................
+
+What can be true or false?
+
+decision making : if..else
+
+in javascript is every thing is true execept the following values 
+
+Falsy values
+
+ * 
+ *  1.boolean false
+ *  2.Empty string "" ,''
+ *  3.0
+ *  4.undefined
+ *  5.NaN
+ *  6.null
+ */
+let isActive = true;
+
+if (isActive) {
+    console.log('Active')
+} else {
+    console.log('inactive')
+}
+
+let firstName=""
+if (firstName) {
+    console.log('Name is Present')
+} else {
+    console.log('Name is not  Present')
+}
+
+let start = 0;
+if (start) {
+    console.log('start')
+} else {
+    console.log('no start')
+}
+
+
+operators;
+
+equal operators 
+   ==, === ,!=,!==
+
+let a = 100;
+let b = 100;
+//double equal operator
+if (a == b) {
+    console.log('equal')
+} else {
+    console.log('not equal')
+}
+if (a === b) {
+    console.log('equal')
+} else {
+    console.log('not equal')
+}
+
+
+//value is 100 but type is string
+
+let x = "100";
+let y = 100;
+if (x == y) {
+    console.log('equal')
+} else {
+    console.log('not equal')
+}
+if (x === y) {
+    console.log('equal')
+} else {
+    console.log('not equal')
+}
+..........................................................................................
+
+Tenary operator ; to replace if ...else lader
+
+x === y ? console.log('equal') : console.log('not equal')
+
+let firstName = '';
+
+let response = firstName ? 'You have firstName' : 'You dont have'
+console.log(response);
+
+//
+let x = 100;
+let y = 200
+if (x === y) {
+    console.log('equal')
+} else {
+    console.log('not equal')
+}
+
+x === y ? console.log('equal') : console.log('not equal')
+
+
+let firstName = '';
+
+let response = firstName ? 'You have firstName' : 'You dont have'
+console.log(response);
+
+.............................................................................................
+
+const:
+
+ read only
+ once variables are initalized, cant re initalize
+
+//let vs const
+
+let x =100;
+console.log(`X ${x}`)
+x=900
+console.log(`X ${x}`)
+const y=100;
+console.log(`Y ${y}`)
+y=9000; //not possible.
+..........................................................................................
+Functions:
+............
+
+code is encapuslated inside function.
+
+basic function declaration;
+-function is keyword to declare function
+
+basics:
+ -declaration and invocation
+
+function sayHello() {
+    console.log('hello')
+}
+sayHello()
+
+function validate() {
+    let name = 'ram';
+    let password = 'ram';
+    let response = (name === 'ram') && (password === 'ram') ? 'valid' : 'invalid'
+    console.log(response);
+}
+validate();
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Function args and parameters:Basic level
+
+//message is arg
+function sayHello(message) {
+    console.log(`Message is ${message}`)
+}
+
+//'Hello' is parameter
+sayHello('Hello');
+sayHello();
+
+//default args
+function multiply(a = 0, b = 0) {
+    let res = a * b;
+    console.log(`Result ${res}`)
+}
+multiply(10, 10)
+multiply();
+
+//Rest operator
+function log(...message) {
+    console.log(message)
+}
+log('app')
+log('app', 'error')
+log('app', 'error', 'in myfile.txt')
+
+..........................................................................................
+
+Function Return values:
+function getA() {
+    return 10; // return hardcoded value
+}
+let value = getA()
+console.log(value);
+console.log(getA())
+function getB() {
+    let b = 10;
+    return b; // return variable
+}
+console.log(getB());
+
+function calculate(a = 1, b = 1) {
+    return a * b; // return expression- computed value
+}
+console.log(calculate(4, 5))
+
+
+function isValid() {
+    return; // undefined
+}
+console.log(isValid() ? 'valid' : 'invalid')
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Functional Programming:
+
+-function is value / literal
+
+ In fp function that computes data can be stored into a variable like other literals
+
+eg:
+  let a =10; // 10 is value and its type is number
+  let name ="Subramanian" // it is value and its type is string
+  let isValid =true //it is value and its type is boolean
+
+in the similar context , function also value and it has type called function type.
+
+variables can be used for computation,printing.
+
+  eg:
+    let res = a *10;
+    print res , a;
+
+          "Variables holding functions , can be used invoke functions".
+
+
+
+function sayHello() {
+    console.log('hello')
+}
+//invoke the function
+sayHello();
+//we can assign into  a variable
+//way -1
+let hello = sayHello;
+hello();
+
+//inline assignment : anonmous functions: function without name
+//way -2
+let hai = function () {
+    console.log('hai')
+};
+hai();
+
+//pass parameters and args
+
+let add = function (a = 0, b = 0) {
+    return a + b;
+};
+
+console.log(add(1,1))
+console.log(add())
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+Arrow Functions:
+
+- ES 6 function literal
+- To reduce lot of code- make simple code
+- we have some advanced concept like "this" binding.
+
+//arrow functions
+
+//es 5 style
+let hai = function () {
+    console.log('hai')
+};
+hai();
+
+//arrow version
+hai = () => {
+    console.log('hai')
+};
+hai();
+
+//code refactoring in arrows
+
+// if function has only one line of body: remove {}
+hai = () => console.log('hai');
+hai();
+
+//args and parameters
+let add = (a = 0, b = 0) => {
+    return a + b
+}
+console.log(add(1, 1));
+
+//if function has only one of body with return ; remove {} and return statement
+add = (a = 0, b = 0) => a + b
+console.log(add(1, 1));
+
+//single param and no default value and return that :remove ()
+let display = name => name;
+console.log(display('Subramanian'));
+
+..............................................................................................
+
+-Higher Order Functions:
+  -Functions can be passed around.
+  -Since Function is value, can be passed as parameter to another functions and returned from
+   other functions.
+
+//Higher order function: function as parameter
+
+function add(a, b) {
+    return a + b;
+}
+add(10, 10)
+let x = 100;
+let y = 200;
+add(x, y);
+
+
+//action : is arg variable,
+function connect(servertype = '', action) {
+    if (typeof action === 'function') {
+        action(servertype);
+    } else {
+        throw Error('Wrong type')
+    }
+}
+//parameter of function can be anything -numbers,strings...
+let webserver = function (server) {
+    console.log(server)
+}
+connect('webserver starts', webserver)
+//connect(100)
+connect('db server starts', function (server) {
+    console.log(server)
+})
+////////////////////////////////////////////////////////////////////////////////////
+
+function fetchData(success, failure) {
+    //biz logic
+    let response = 'This is Response'
+    //response=undefined
+    if (response) {
+        success(response)
+    } else {
+        failure('No data ')
+    }
+
+}
+
+fetchData(function (res) {
+    console.log(res)
+}, function (err) {
+    console.log(err)
+})
+
+//arrow version
+
+let fetch = (success, failure) => {
+    if (typeof success === 'function' && typeof failure === 'function') {
+        //biz logic
+        let response = 'This is Response'
+        //response=undefined
+        if (response) {
+            success(response)
+        } else {
+            failure('No data ')
+        }
+    } else {
+        throw Error('Wrong type')
+    }
+
+}
+fetch(res => console.log(res), err => console.log(err))
+//fetch(100,900)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
