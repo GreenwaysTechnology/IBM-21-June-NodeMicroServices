@@ -1,22 +1,16 @@
-const { findAll } = require('./services/TodoService')
+const fs = require('fs');
+const path = require('path');
 
-async function main() {
-    // const todos = findAll();
-    // console.log(todos)
-
-    //findAll(todos => console.log(todos), err => console.log(err))
-    //  findAll()
-    //    .then(todos=>console.log(todos))
-    //    .catch(err=>console.log(err))
-    try {
-
-        const todos = await findAll();
-        console.log(todos);
-
-    }
-    catch (err) {
-        console.log(err)
-    }
-
+console.log(__dirname)
+console.log(__filename)
+// const filePath = './src/assets/infowrite.txt';
+const filePath = path.join(__dirname,'assets/infowrite.txt')
+const options = {
+    encoding: 'utf-8'
 }
-main()
+const data = 'Hello,How are you';
+
+fs.writeFile(filePath, data, options, err => {
+  if (err) throw err;
+  console.log(`data has been written into ${filePath}`)
+})

@@ -2159,6 +2159,243 @@ async function main() {
 
 }
 main()
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Types of modules:
+
+1.custom module
+  built by us
+2.built in modules
+   provided by node.js  
+3.provided by third party/community
+  libs,frameworks
+
+
+Node js Built in modules:
+..........................
+
+File System io
+
+Networking
+
+etc...
+
+
+1.os 
+
+The os module provides operating system-related utility methods and properties. It can be accessed using:
+
+const os = require('os')
+
+// console.log(os)
+console.log(`Total Memory ${os.totalmem()}`)
+console.log(`Machine Arc ${os.arch()}`)
+console.log(os.cpus())
+
+
+
+./ vs ''
+.........
+
+ require('./services/TODOService');
+  ->here you can see ./
+  ./ -current dir
+
+ require('os'); => 
+  -here no ./ 
+
+Why?
+
+Note : if you are java devp, you know the classpath , how it works?
+
+
+require('os');
+
+Node internally uses a search algorthim,node always looks the folder called
+ "node_modules" in the current project, if not , then it searches, the node in built 
+installtion folder---c:/pf/node/node_modules--if it finds it will pick up from there else it will throw error.
+
+require('./services/TODOService');
+   it will lookup in the current dir or sub dirs only.
+
+nternal/modules/cjs/loader.js:800
+    throw err;
+    ^
+
+Error: Cannot find module 'osxx'
+Require stack:
+- C:\session\ibm\feb\nodems\mynodeapps\src\index.js
+[90m    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:797:15)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:690:27)[39m
+[90m    at Module.require (internal/modules/cjs/loader.js:852:19)[39m
+[90m    at require (internal/modules/cjs/helpers.js:74:18)[39m
+    at Object.<anonymous> (C:\session\ibm\feb\nodems\mynodeapps\src\index.js:1:32)
+[90m    at Module._compile (internal/modules/cjs/loader.js:959:30)[39m
+[90m    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)[39m
+[90m    at Module.load (internal/modules/cjs/loader.js:815:32)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:727:14)[39m
+[90m    at Function.Module.runMain (internal/modules/cjs/loader.js:1047:10)[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: [ [32m'C:\\session\\ibm\\feb\\nodems\\mynodeapps\\src\\index.js'[39m ]
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Event Emitter Module: events
+
+Much of the Node.js core API is built around an idiomatic asynchronous event-driven architecture in which certain kinds of objects (called "emitters") emit named events that cause Function objects ("listeners") to be called.
+
+-How to built event driven arch.
+
+-Most of high level non blocking apis like fs ,net uses events module underneeth.
+
+How to create custom events and listen for them.
+
+-producer-emitter who emits event and data.
+-listener
+const EventEmitter = require('events')
+
+//emiter
+class CustomerService extends EventEmitter {
+    constructor() {
+        super();
+        this.on('sales', (data) => {
+            setTimeout(() => console.log('data', data), 1000)
+        })
+        // this.once('sales', (data) => {
+        //     setTimeout(() => console.log('data', data), 1000)
+        // })
+    }
+    buy(product) {
+        this.emit('sales', product) //send /emit an event 
+    }
+}
+let custService = new CustomerService();
+custService.buy({ id: 1, name: 'Node.js In Action', category: 'book', price: 100 })
+custService.buy({ id: 2, name: 'libuv.js In Action', category: 'book', price: 100 })
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+IO:
+-disk io
+-socket io/networking
+
+NonBlocking IO And Blocking:
+
+-node supports even blocking io. only disk io in blocking way
+-node does not support blocking networking io.
+
+File System:fs
+
+-used to read , write into and from disk.
+
+mode :
+
+  - sync /blocking 
+  - async/ non blocking
+
+based on data read/write:
+
+ -non streaming
+ -streaming
+
+
+const fs = require('fs')
+
+function block(message){
+    console.log(message)
+}
+
+const filePath = './src/assets/info.txt';
+const options = {
+    encoding: 'UTF-8'
+}
+block('start')
+fs.readFile(filePath, options, (err, data) => {
+    if (err) throw err;
+    console.log(data)
+})
+block('end')
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Sync : Version of File IO:read
+const fs = require('fs')
+
+function block(message) {
+    console.log(message)
+}
+
+const filePath = './src/assets/info.txt';
+const options = {
+    encoding: 'UTF-8'
+}
+block('start')
+const data = fs.readFileSync(filePath, options)
+console.log(data)
+block('end')
+//////////////////////////////////////////////////////////////////////////////////////////
+
+How to write data into file async:
+
+const fs = require('fs');
+
+const filePath = './src/assets/infowrite.txt';
+const options = {
+    encoding: 'utf-8'
+}
+const data = 'Hello,How are you';
+
+fs.writeFile(filePath, data, options, err => {
+  if (err) throw err;
+  console.log(`data has been written into ${filePath}`)
+})
+////////////////////////////////////////////////////////////////////////////////////////////
+How to avoid file path hardcoding?
+
+path module:
+
+The path module provides utilities for working with file and directory paths. It can be accessed using:
+
+Node js global variables:
+
+-node provides lot of global variables
+
+__dirname  : current directory name
+C:\session\ibm\2021\june\nodemicroservices\nodeapps\src
+
+__filename :current directory name + fileName
+C:\session\ibm\2021\june\nodemicroservices\nodeapps\src\index.js
+
+const fs = require('fs');
+const path = require('path');
+
+console.log(__dirname)
+console.log(__filename)
+// const filePath = './src/assets/infowrite.txt';
+const filePath = path.join(__dirname,'assets/infowrite.txt')
+const options = {
+    encoding: 'utf-8'
+}
+const data = 'Hello,How are you';
+
+fs.writeFile(filePath, data, options, err => {
+  if (err) throw err;
+  console.log(`data has been written into ${filePath}`)
+})
+////////////////////////////////////////////////////////////////////////////////////////////
+				Streaming
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2243,5 +2480,5 @@ main()
 
 
 
-Architecture of Node.js
+
 
