@@ -2093,7 +2093,72 @@ How to build sync,async(nonblocking) apis
 nonblocking -  callback,promise,async..await
 
 
+sync:
+ findAll() {
+        return TODOS;
+    }
 
+async 
+
+src/services/todoservice.js
+
+const TODOS = require('../mock-data/todo')
+
+class TodoService {
+
+    //sync
+    /*findAll() {
+        return TODOS;
+    }
+    **/
+    //callback style
+    /** 
+     findAll(success, failure) {
+         if (TODOS) {
+             setTimeout(success, 5000, TODOS)
+         } else {
+             setTimeout(failure, 1000, 'Todo not Found')
+         }
+     }
+     */
+    //promise powered
+    findAll() {
+        return new Promise((resolve, reject) => {
+            if (TODOS) {
+                setTimeout(resolve, 5000, TODOS)
+            } else {
+                setTimeout(resolve, 1000, 'Todo not Found')
+            }
+        });
+    }
+
+}
+
+module.exports = new TodoService()
+
+src/index.js
+const { findAll } = require('./services/TodoService')
+
+async function main() {
+    // const todos = findAll();
+    // console.log(todos)
+
+    //findAll(todos => console.log(todos), err => console.log(err))
+    //  findAll()
+    //    .then(todos=>console.log(todos))
+    //    .catch(err=>console.log(err))
+    try {
+
+        const todos = await findAll();
+        console.log(todos);
+
+    }
+    catch (err) {
+        console.log(err)
+    }
+
+}
+main()
 
 
 
