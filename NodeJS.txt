@@ -3230,34 +3230,438 @@ npm test
   1 passing (6ms)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+                                     Web Frameworks -  Express.js
+............................................................................................
 
 
 
+What is express?
+Express Fast, unopinionated, minimalist web framework for Node.js
+
+express is built on top of http core module.
+
+
+What apps can be built using express?
+
+
+1.RESTFull WebServices
+
+2.Dynamic content generation apps -  spring mvc, .netmvc.   with ui
+
+
+Core features of Express:
+
+1.Abstraction on core http module
+2.lot of apis to send data like json api
+3.routers : to create HTTP based web services and apps quickly.
+4.middlewares : to extend core framework like - logging,database,security,templates...
+
+
+Express Key concepts: in express every thing object
+
+Objects in express
+
+1.Application
+  We call Container object which other objects
+  entry and exit of an application
+  application is created by calling function
+
+2.Request
+
+3.Response
+
+4.Router
+
+
+1.Application object roll:
+
+-Routing HTTP requests
+-Configuring middleware
+-Rendering HTML views
+-Registering a template engine
 
 
 
+const express = require('express') // function
+
+const port = 3000;
+
+const app = express();
+
+//request processing.
+
+//routing
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+app.get('/greet', (req, res) => {
+    res.end('Greet')
+})
+app.get('/hello', (req, res) => {
+    res.end('Hello')
+})
+
+//start server
+app.listen(port, () => {
+    console.log(`Express Server is running on ${port}`)
+})
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+HTTP Methods : GET,POST,DELETE,PUT
+const express = require('express') // function
+
+const port = 3000;
+
+const app = express();
+
+
+//routing
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+
+app.post('/create', (req, res) => {
+    res.end('Create')
+})
+
+app.delete('/remove', (req, res) => {
+    res.end('Remove')
+})
+
+app.put('/update', (req, res) => {
+    res.end('Update')
+})
+//start server
+app.listen(port, () => {
+    console.log(`Express Server is running on ${port}`)
+})
+///////////////////////////////////////////////////////////////////////////////////////////
+
+how to send json response?
+
+const express = require('express') // function
+const { findAll } = require('./services/TodoService')
+
+const port = 3000;
+
+const app = express();
+
+
+//routing
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+//todo api
+app.get('/api/todos', async (req, res) => {
+    try {
+        const todos = await findAll();
+        res.status(200).json(todos);
+    }
+    catch (error) {
+        res.status(500).json({ message: error })
+    }
+})
+
+//start server
+app.listen(port, () => {
+    console.log(`Express Server is running on ${port}`)
+})
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Request Events and Input Handling:
+
+const express = require('express') // function
+const { findAll, create } = require('./services/TodoService')
+
+const port = 3000;
+
+const app = express();
+
+
+//routing
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+//todo api
+app.get('/api/todos', async (req, res) => {
+    try {
+        const todos = await findAll();
+        res.status(200).json(todos);
+    }
+    catch (error) {
+        res.status(500).json({ message: error })
+    }
+})
+//post
+app.post('/api/todo', async (req, res) => {
+
+    let todo = '';
+    req.on('data', chunk => {
+        todo += chunk
+    })
+    
+    req.on('end', async() => {
+        try {
+            console.log(todo)
+            const todos = await create(todo);
+            res.status(201).location("/api/todo").json({ message: 'Todo Created' })
+        }
+        catch (error) {
+            res.status(500).json({ message: error })
+        }
+    });
+
+})
+
+
+//start server
+app.listen(port, () => {
+    console.log(`Express Server is running on ${port}`)
+})
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Middlewares:
+
+ - plugins , can  be plugged
+
+
+types of middlewares
+
+1.built in middlewares
+2.third party middlewares
+3.custom middlewares.
 
 
 
+Use case :
+ How to read JSON input. Express server need to read json which was submitted by endusers 
+User will submit as json --- express need to convert into javascript object.
+
+Without Middleware :
+
+1.we need to register on, end event for reading input
+2.we need to convert input into javascript object - JSON.parse()
 
 
+app.post('/api/todo', async (req, res) => {
+
+    let todo = '';
+    req.on('data', chunk => {
+        todo += chunk
+    })
+    
+    req.on('end', async() => {
+        try {
+            console.log(todo)
+            const todos = await create(todo);
+            res.status(201).location("/api/todo").json({ message: 'Todo Created' })
+        }
+        catch (error) {
+            res.status(500).json({ message: error })
+        }
+    });
+
+})
+
+With Middleware :
+
+-any middleware is simple javascript module/package only.
+-most of the middlewares are community driven.
+-if you want any middleware you need to install  
+
+https://expressjs.com/en/resources/middleware.html
+
+body-parser
+Node.js body parsing middleware.
+
+Parse incoming request bodies in a middleware before your handlers, available under the req.body property.
+
+Parsers supported by body-parser Middleware:
+.............................................
+
+This module provides the following parsers:
+
+1.JSON body parser
+2.Raw body parser
+3.Text body parser
+4.URL-encoded form body parser
+
+Steps:
+
+1.install middleware
+$ npm install body-parser
+
+2.Any Middleware must be registered with Application Object.
+in order to activate middleware.
+
+app.use(middleware)
+
+const express = require('express') // function
+const { findAll, create } = require('./services/TodoService')
+const bodyParser = require('body-parser')
+
+const port = 3000;
+
+const app = express();
 
 
+// parse application/json
+app.use(bodyParser.json())
 
 
+//routing
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+//todo api
+app.get('/api/todos', async (req, res) => {
+    try {
+        const todos = await findAll();
+        res.status(200).json(todos);
+    }
+    catch (error) {
+        res.status(500).json({ message: error })
+    }
+})
+//without middleware
+app.post('/api/v1/todo', async (req, res) => {
+
+    let todo = '';
+    req.on('data', chunk => {
+        todo += chunk
+    })
+
+    req.on('end', async () => {
+        try {
+            console.log(todo)
+            const todos = await create(todo);
+            res.status(201).location("/api/todo").json({ message: 'Todo Created' })
+        }
+        catch (error) {
+            res.status(500).json({ message: error })
+        }
+    });
+
+})
+app.get('/api/todos', async (req, res) => {
+    try {
+        const todos = await findAll();
+        res.status(200).json(todos);
+    }
+    catch (error) {
+        res.status(500).json({ message: error })
+    }
+})
+
+//with middleware
+app.post('/api/v2/todo', async (req, res) => {
+    try {
+        const todo = req.body;
+        console.log(todo)
+        const todos = await create(todo);
+        res.status(201).location("/api/todo").json({ message: 'Todo Created' })
+    }
+    catch (error) {
+        res.status(500).json({ message: error })
+    }
 
 
+})
+
+//start server
+app.listen(port, () => {
+    console.log(`Express Server is running on ${port}`)
+})
+////////////////////////////////////////////////////////////////////////////////////////////
+How to build modular application?
+
+Use Case : Build Rest End points for various resources
+
+-TodoResource
+-CustomerResource
+-UserResource
+
+src/routers/todo.router.js
+
+const express = require('express');
+const { findAll } = require('../services/TodoService')
+
+const todoRouter = express.Router();
+
+//Todo Resource
+todoRouter.get('/list', async (req, res) => {
+
+    try {
+        const todos = await findAll();
+        res.status(200).json(todos)
+    }
+    catch (err) {
+        res.status(200).json({ message: err })
+
+    }
+})
+
+module.exports = todoRouter;
 
 
+src/routers/customer.router.js
+
+const express = require('express');
+
+const customerRouter = express.Router();
 
 
+//Customer Resource
+customerRouter.get('/list', (req, res) => {
+    res.status(200).json({message:'TODO-CUSTOMER'})
+})
+
+module.exports = customerRouter
+
+src/routers/user.router.js
+const express = require('express');
+
+const userRouter = express.Router();
+
+//User Resource
+userRouter.get('/list', (req, res) => {
+    res.status(200).json({message:'TODO-USER'})
+})
+
+module.exports = userRouter
 
 
+src/index.js
 
+const express = require('express') // function
+const { findAll, create } = require('./services/TodoService')
+const bodyParser = require('body-parser')
+const todoRouter = require('./routers/todo.router')
+const userRouter = require('./routers/user.router')
+const customerRouter = require('./routers/customer.router')
 
+const port = 3000;
+const app = express();
 
+//binding routers with application object
+app.use('/api/todo',todoRouter)
+app.use('/api/user',userRouter)
+app.use('/api/customer',customerRouter)
 
+// parse application/json
+app.use(bodyParser.json())
 
+//routing
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+
+//start server
+app.listen(port, () => {
+    console.log(`Express Server is running on ${port}`)
+})
 
 
 
