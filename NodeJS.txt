@@ -2882,6 +2882,364 @@ server.on('request',(req,res)=>{
 				NPM - Node Package Manager
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+npm is tool is used to distribute node modules to others
+and you can get node modules from other others.
+
+npm tool is distributed along with node installation
+
+npm uses public repository server called npmjs.com npmjs.org
+
+tools and libs,frameworks all are distributed as node modules into repository.
+
+
+Javascript Project Structure:(server side/ client side)
+.........................................................
+
+
+The project must have two things
+
+1.package.json file :
+   meta file which describes the project information
+2.node_modules folder
+   which contains libs/frameworks/tools code.
+
+create package.json file
+
+>npm init
+
+{
+  "name": "nodeapps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Subramanian Murugan",
+  "license": "ISC"
+}
+
+package Types:
+
+1.public package
+  react
+2.private package 
+  @angular - @-npm private 
+
+npm is used
+
+to install,uninstall,publish node modules from node repo / into node repo.
+
+if you install third party modules , into your project, node distributes npm tool ,using this you can install,uninstall,upgrade node modules.
+
+
+installing module:
+
+>npm install  moduleName  --options
+>npm i moduleName --options
+
+
+>npm install module 
+  here no option is told, means default is --save
+
+>npm i module
+
+options:
+ --save ; 
+ --save-dev
+ -g
+
+npm is used
+
+to install,uninstall,publish node modules from node repo / into node repo.
+
+if you install third party modules , into your project, node distributes npm tool ,using this you can install,uninstall,upgrade node modules.
+
+
+installing module:
+
+>npm install  moduleName  --options
+>npm i moduleName --options
+
+
+>npm install module 
+  here no option is told, means default is --save
+
+>npm i module
+
+options:
+ --save ; 
+ --save-dev
+ -g
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+App development ; three stage
+
+1.dev
+2.testing
+3.production.
+
+if you install any packages/dependencies, you can tell that is it for production and developemnt, only dev/testing
+
+if you are installing any node module, you can tell, do you want to use only for development
+or development + production.
+
+Unit testing libs : Junit.jar===>java
+
+ --save = >    development + production
+ --save-dev => only for development
+
+Which code need not be used for production:
+
+1.All testing related  libs/frameworks - unit,e2s
+2.Tools like compilers,frameworks related code.
+
+Who will separate out this depedency(lib) for production/dev
+
+ Build tools -  webpack.
+ webpack will scan package.json---extracting prod depedencies
+
+
+ --save => dev + production
+ default =>dev + production
+
+ --save-dev  -->only dev 
+
+
+
+How to install lodash?
+
+npm install lodash --save
+
+package.json
+{
+  "name": "nodeapps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Subramanian Murugan",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
+
+
+index.js
+
+const _ = require('lodash')
+
+console.log(_.sum([1,2,3]))
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+How to install dev dependency?
+
+ The dependency can be used only for dev.
+
+Eg:
+ Testing libs
+
+Unit Testing:
+
+npm install chai --save-dev
+
+package.json
+{
+  "name": "nodeapps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Subramanian Murugan",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4"
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+How to uninstall package/module already installed.
+
+npm install jquery --save
+npm uninstall jquery --save
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Global Modules:
+
+-Are installed not inside project, rather installed globally.
+
+ npm install module -g
+
+C:\Users\sasub\AppData\Roaming\npm -- here only all global modules will be installed.
+
+
+Why Global Modules:
+
+ -Tools
+   compilers,webservers,build tools,testing runtime, framework runtime, cli tools for project    creations.
+
+ eg:
+  angular cli, react cli .......
+
+npm install -g @angular/cli
+
+Demo:
+....
+
+npm install module-name(tool) -g
+
+mocha : unit testing framwork, is used to run java script unit testing on node and browser.
+
+npm install --global mocha
+npm install -g mocha
+
+Steps:
+
+create test folder
+ test
+create spec file
+test
+  -demo.spec.js
+var assert = require('assert');
+describe('Array', function() {
+  describe('#indexOf()', function() {
+    it('should return -1 when the value is not present', function() {
+      assert.equal([1, 2, 3].indexOf(4), -1);
+    });
+  });
+});
+
+C:\session\ibm\2021\june\nodemicroservices\nodeapps>mocha
+
+
+  Array
+    #indexOf()
+      √ should return -1 when the value is not present
+
+
+  1 passing (8ms)
+//////////////////////////////////////////////////////////////////////////////////////////////
+				   Automation
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+How to use javascript for automation?
+
+
+We can automate js applications.
+
+write all auotomation steps inside scripts
+
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+
+key: value
+
+key is called command-script command
+value is task to be executed. ; task could be any thing.
+
+command can be built in or custom commands
+
+npm provides lot of built in commands
+
+start,test,postinstall,preinstall..........
+
+How to run node applications?
+
+1.node folderName/filename.js
+
+2.npm start
+via script
+how to run script
+
+>npm commandname ---incase of built in command
+>npm start
+
+>npm run commandname - custom commands
+>npm run subu
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start" : "node src/app.js",
+    "subu"  :"node src/app.js"
+  },
+
+npm test
+npm start
+npm run subu
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Scripts and Global Module:
+
+-Global modules are used for tooling purpose like compilers,build tools,servers,test runners(mocha).
+
+Globals has some issues:
+
+1.version and compablity issue for new projects
+
+
+Steps:
+
+1.npm uninstall mocha -g
+
+2.>mocha --help
+'mocha' is not recognized as an internal or external command,
+operable program or batch file.
+
+3.install mocha locally
+
+ npm install mocha --save-dev
+
+4.>mocha
+'mocha' is not recognized as an internal or external command,
+operable program or batch file.
+
+Why i am getting error?
+  because mocha is command, we cant run directly.
+
+5.solution is run via scripts
+
+package.json
+"scripts": {
+    "test": "mocha",
+    "start": "node src/index.js",
+    "subu": "node src/index.js"
+  }
+
+npm test
+
+> nodeapps@1.0.0 test C:\session\ibm\2021\june\nodemicroservices\nodeapps
+> mocha
+
+
+
+  Array
+    #indexOf()
+      √ should return -1 when the value is not present
+
+
+  1 passing (6ms)
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
 
 
 
