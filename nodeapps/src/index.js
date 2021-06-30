@@ -1,16 +1,31 @@
-const fs = require('fs');
-const path = require('path');
+const http = require('http');
+const { log } = console;
 
-console.log(__dirname)
-console.log(__filename)
-// const filePath = './src/assets/infowrite.txt';
-const filePath = path.join(__dirname,'assets/infowrite.txt')
-const options = {
-    encoding: 'utf-8'
-}
-const data = 'Hello,How are you';
+const port =8080;
 
-fs.writeFile(filePath, data, options, err => {
-  if (err) throw err;
-  console.log(`data has been written into ${filePath}`)
-})
+const server = http.createServer((req, res) => {
+
+    let body='';
+    //attach data event on request object
+    req.on('data', chunk => {
+        body += chunk;
+        log(body);
+    });
+
+    //attach close event on response event
+    res.on('close', () => {
+        log('response close event is called')
+    });
+    res.on('finish', () => {
+        log('response has been sent /committed')
+    });
+    res.end("Hello,Node")
+});
+
+server.listen(port, () => {
+    console.log(`Http Server listens @ ${port}`)
+});
+
+server.on('request',(req,res)=>{
+   log(`request is recieved on ${port} -method is ${req.method} url ${req.url}`)
+ })

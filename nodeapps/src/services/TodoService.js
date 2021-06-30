@@ -8,20 +8,20 @@ class TodoService {
     }
     **/
     //callback style
-    /** 
-     findAll(success, failure) {
-         if (TODOS) {
-             setTimeout(success, 5000, TODOS)
-         } else {
-             setTimeout(failure, 1000, 'Todo not Found')
-         }
-     }
-     */
+
+    // findAll(success, failure) {
+    //     if (TODOS) {
+    //         setTimeout(success, 5000, JSON.stringify(TODOS))
+    //     } else {
+    //         setTimeout(failure, 1000, 'Todo not Found')
+    //     }
+    // }
+
     //promise powered
     findAll() {
         return new Promise((resolve, reject) => {
             if (TODOS) {
-                setTimeout(resolve, 5000, TODOS)
+                setTimeout(resolve, 5000, JSON.stringify(TODOS))
             } else {
                 setTimeout(reject, 1000, 'Todo not Found')
             }
