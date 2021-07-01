@@ -1203,6 +1203,146 @@ Result Got From Remote Services 80
 >> Response:
 undefined
 mol $
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+		              Service Registry and Discovery
+.............................................................................................
+
+1.Service Registry
+
+ It is mini /small database , key-value pair database, in memory database.
+ Which has all service,actions,event listeners, nodes information.
+
+Points:
+1.Every Broker has in built Service Registry
+     Moleculer has built in in-memory registry, we can use that registry directly.
+
+2.All services local or remote are registered with service registry as soon you create 
+  service
+3.Molecular has built in registry called LocalDiscoveryRegistry, which is not using third party registry servers
+  like apache zoo keeper,cosule,etcd,eurka....
+
+4.if you want to make other servers as service registry -
+
+    registry: {
+        discoverer: "redis://redis-server:6379"
+    }  
+
+
+What is discovery?
+   
+   Discovery  means the lookup, search, we are going to search "services" from the registry infra structure.
+
+         "All Services when is created is registered in Service Registry"
+
+Moleculer looks up services from the registry by name.
+
+
+Registry logs:
+
+[2021-07-01T11:03:37.313Z] INFO  IBM-MainServer/REGISTRY: Strategy: RoundRobinStrategy
+[2021-07-01T11:03:37.314Z] INFO  IBM-MainServer/REGISTRY: Discoverer: LocalDiscoverer
+
+[2021-07-01T11:03:37.445Z] INFO  IBM-MainServer/REGISTRY: Node 'IBM-RemoteNode-1' connected.
+[2021-07-01T11:03:37.448Z] INFO  IBM-MainServer/REGISTRY: Node 'IBM-RemoteNode-2' connected.
+[2021-07-01T11:03:37.947Z] INFO  IBM-MainServer/REGISTRY: '$node' service is registered.
+[2021-07-01T11:03:37.948Z] INFO  IBM-MainServer/REGISTRY: 'main' service is registered.
+
+
+How to change new Service Registry/Discover?
+
+Redis  as Service Registry.
+
+Steps:
+
+1.Start Redis Server.
+
+docker run  -p 6379:6379 redis
+
+2.install redis driver
+npm install ioredis --save
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-MainServer',
+    transporter: "nats://localhost:4222",
+    registry: {
+        //discoverer:'Redis'
+        discoverer: "redis://localhost:6379"
+    }
+});
+node services/remotemain.service.js
+[2021-07-01T11:13:09.882Z] INFO  IBM-MainServer/BROKER: Moleculer v0.14.14 is starting...
+[2021-07-01T11:13:09.886Z] INFO  IBM-MainServer/BROKER: Namespace: <not defined>
+[2021-07-01T11:13:09.886Z] INFO  IBM-MainServer/BROKER: Node ID: IBM-MainServer
+[2021-07-01T11:13:09.888Z] INFO  IBM-MainServer/REGISTRY: Strategy: RoundRobinStrategy
+[2021-07-01T11:13:09.890Z] INFO  IBM-MainServer/REGISTRY: Discoverer: RedisDiscoverer
+[2021-07-01T11:13:09.909Z] INFO  IBM-MainServer/BROKER: Serializer: JSONSerializer
+[2021-07-01T11:13:09.927Z] INFO  IBM-MainServer/BROKER: Validator: FastestValidator
+[2021-07-01T11:13:09.930Z] INFO  IBM-MainServer/BROKER: Registered 13 internal middleware(s).
+[2021-07-01T11:13:09.933Z] INFO  IBM-MainServer/TRANSPORTER: NATS lib version: 1.4.12
+[2021-07-01T11:13:09.934Z] INFO  IBM-MainServer/BROKER: Transporter: NatsTransporter
+[2021-07-01T11:13:10.032Z] WARN  IBM-MainServer/DISCOVERY: Redis Discoverer is an EXPERIMENTAL module. Do NOT use it in production!
+[2021-07-01T11:13:10.057Z] INFO  IBM-MainServer/TRANSIT: Connecting to the transporter...
+[2021-07-01T11:13:10.102Z] INFO  IBM-MainServer/DISCOVERY: Redis Discoverer client connected.
+[2021-07-01T11:13:10.115Z] INFO  IBM-MainServer/TRANSPORTER: NATS client v1 is connected.
+[2021-07-01T11:13:10.630Z] INFO  IBM-MainServer/REGISTRY: '$node' service is registered.
+[2021-07-01T11:13:10.631Z] INFO  IBM-MainServer/REGISTRY: 'main' service is registered.
+[2021-07-01T11:13:10.632Z] INFO  IBM-MainServer/$NODE: Service '$node' started.
+[2021-07-01T11:13:10.633Z] INFO  IBM-MainServer/MAIN: Service 'main' started.
+[2021-07-01T11:13:10.850Z] INFO  IBM-MainServer/BROKER: ✔ ServiceBroker with 2 service(s) is started successfully in 7
+//////////////////////////////////////////////////////////////////////////////////////////////
+			Scaleablity and High Availability
+.............................................................................................
+
+Scalling Means, increasing/decreasing resources.
+Resources could be hardware resources or software resources.
+
+Types of Scaleability:
+
+1.Vertical 
+   increasing hardware resources
+2.Horziontal
+   increasing software resources.
+
+
+In distributed Programming(microservices), we need to clone the services n of times in order
+serve to all clients effectivly.: Horziontal scaling.
+
+When scale services, it is difficult to route the service calls to service instances because the same service instance exits in multiple copies.
+
+How to select which service instance to be assigned to caller(client), 
+
+   With help of Load Balancer.
+
+Load Balancer balances incomming load and route according ot "router algorthims" provided by load balancers.
+
+
+Built-in strategies
+
+ ->RoundRobin strategy
+	This strategy selects a node based on round-robin algorithm.
+   Refer:https://en.wikipedia.org/wiki/Round-robin_DNS
+ ->Random strategy
+	This strategy selects a node randomly.
+ ->CPU usage-based strategy
+	This strategy selects a node which has the lowest CPU usage. Due to the node list can 	be very long, it gets samples and selects the node with the lowest CPU usage from only 	samples instead of the whole node list.
+
+ ->Latency-based strategy
+	This strategy selects a node which has the lowest latency, measured by periodic ping commands. Notice that the strategy only ping one of nodes from a single host.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

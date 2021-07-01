@@ -2,7 +2,11 @@ const { ServiceBroker } = require('moleculer');
 
 const broker = new ServiceBroker({
     nodeID: 'IBM-RemoteNode-1',
-    transporter: "nats://localhost:4222"
+    transporter: "nats://localhost:4222",
+    registry: {
+        //discoverer:'Redis'
+        discoverer: "redis://localhost:6379"
+    }
 
 });
 
