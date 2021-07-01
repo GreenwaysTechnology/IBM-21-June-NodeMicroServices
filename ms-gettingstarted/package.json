@@ -1,0 +1,18 @@
+{
+  "name": "ms-gettingstarted",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moleculer": "^0.14.14",
+    "nats": "^1.4.12"
+  },
+  "devDependencies": {
+    "moleculer-repl": "^0.6.6"
+  }
+}

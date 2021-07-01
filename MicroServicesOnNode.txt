@@ -1,0 +1,1210 @@
+
+Monolith:
+
+-Technology first J2EE, Domain Next.
+
+
+Team: OMS - PM- More PLS
+1. DEV
+2. TESTING
+3. RELEASE
+4. OPERATIONS
+
+
+1.Req
+2.Design
+   High Level-UML,Database
+   Low level - Runtime,databases,tools......
+3.coding
+
+-Vendor-lock in : Mono-lithic
+   -DEV,TESTING,PRODUCTION.
+-Work flow is highly sequencial
+   Req -Complete
+   Dev
+   testing
+   Release
+   Production
+  Delay in delivery:Cost increased
+-Production cost was huge
+
+Data Centers
+ -need to purchase high powered servers - bare metal servers
+ 
+Cost:
+   -Hardware
+   -OS -Linux-Ubuntu
+   -Tools -Servers,databases etc....
+   -Matrix Hell -  Mapping software components in dev and Production..
+
+
+How to build enterprise jee based app.
+
+App  must support a variety of different clients including desktop browsers. 
+
+The application might also expose an API for 3rd parties to consume.
+
+It might also integrate with other applications via a message broker. 
+
+The application handles requests (HTTP requests and messages) by executing business logic; 
+
+accessing a database; 
+
+exchanging messages with other systems;
+
+and returning a HTML/JSON/XML response. 
+
+There are logical components corresponding to different functional areas of the application.
+
+............................................................................................
+
+IF App needs to talk to external systems like Message Brokers, other Systems like Main frames.
+
+RPC/RPI
+MOM
+Connectors Arch.
+
+BIZ LOGIC:
+
+1- Service Layer : isloate service layer into separate component
+
+ can be inside one app - one layer, that layer may run on different jvms -  distributed Arch.
+
+
+Layer :
+
+ Client ---- Web Layer  ----Service Layer ---- Repository Layer
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Packaging Model:
+ 
+WAR - Web archive
+EAR .
+
+Problems with Single JAR/WAR:
+
+1. Scalability
+ Vertical scablitity
+ Horzitional scability 
+
+2.Deployments
+    -Bare Metal Deployment
+
+////////////////////////////////////////////////////////////////////////////////////////////
+Monoloith distributed app development drabackbacks:
+
+-Time is taken for project delivery
+   -Requirements 
+   -High level design and low level design
+   -coding
+   -testing
+   -release
+   -production- live
+
+-Technology Stack and Vendor lock in
+   -You need to build the entire app using one technology or one vendor product
+    eg: J2EE, Oracle,Weblogic
+
+-Production and maintance cost
+  -You need to setup large data centers , you need to maintain them.
+
+Companies like amzon,netflix,google wanted to change the app development model.
+                                "Micro services"
+
+
+Micro services are architural model of req,dev,test,relase,production,maintaince different ways.
+    Continous req collecting
+    Continous dev
+    Continuous testing
+    Continuous release
+    Continuous deployment
+    Using rented data centers: Cloud
+
+-Domain First, Technology Next: Domain Driven Design.
+-No Vendor lock- Multi tech stack.
+-Indidual dev , deployment - orders is development ,tested,deployed,customers are developed,tested deployment.
+   -Parrel dev.
+-Automation -dev ops
+   release - CI 
+   deployment - Containerized - Docker..
+-Introduction of Cloud computing
+..............................................................................................
+
+                                  Micro Services Design Pattern
+..............................................................................................
+
+
+Implementation Patterns:
+........................
+
+1.DOMAIN Models
+  Decompose by biz features
+  Decompose by sub domains
+
+2.Development
+  -Object oriented Design
+ Class
+      -Represent something in domain eg :Order,Customer
+ Service
+     -Offerings : giving something to somebody.
+   A Program offers something - Data
+
+Services can be broken into smllar and smallar based on domains
+   Telecom domain :
+       Telecommunication Services
+		-Data Service
+			- Mobile data
+			- Broad Band
+			    -Fiber
+                            -leased Line
+    
+    FiberOpticService
+        -getSpeed - 
+        -increaseSpeed-
+        -getNewConnection-
+        -disconnectExisingConnection() 
+        -payBills()    
+
+   BillingService
+	generateBill
+	processPayment
+	sendBill
+        adjustBill
+  
+   How to design a Service? 
+	USING SOLID Principles
+
+  Single-responsibility principle -SRP
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Service Communications:
+ 
+   Two Domains are going to collbrate each other to carry a biz transaction.
+
+
+In Micro Services
+
+
+FiberOpticService
+     is 
+   Running 
+     inside
+ One Application
+       |
+     Runtime
+       |
+  VM -Container
+
+      OS
+ 
+     |
+     |   data
+     |
+
+Billing is Running
+     is 
+   Running 
+     Another
+ One Application
+      |
+     Runtime
+       |
+  VM -Container
+
+      OS
+
+Class ----will become  Objects
+
+Object Communication === Service Communication
+
+
+
+-SAME JVM(Runtime)
+  Calling methods from one object(FiberDataService) to another object (BillingService).
+-Different Runtime(JVM)
+   -Networks - Protocals
+    RestFull
+      -HTTP 
+   -RPC/RIP
+	-ORB
+        -RMI
+        -gRpc
+   -MOM - Message Brokers
+        RabbitMQ
+	Kaffka
+	etc...
+   -Event Bus
+	-TCP
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Sevices Are Eagar or Lazy:
+.........................
+ 
+
+Eagar Service expects data immediatly.
+
+Service waits for data until it is received.The service cant continue other jobs ; 
+
+Sync Services
+
+Drawbacks:
+
+- Blocking 
+    It leads performance issues
+
+Service does not wait for data until it is received.The service t continue other jobs ; 
+
+Async Services
+
+Advantages
+ - Non Blocking
+    
+Async Services Implementation:
+..............................
+
+Two ways:
+
+1.Programmetic level 
+    -Netty,webflux,Quarkus,Moleculre
+
+2.Via Message Brokers
+    RabbitMQ,Kafka
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Service Failures:
+.................
+
+1.UnAvailability
+
+2.Timeout due to slow calls
+
+How to handle failures , how to return proper response to caller?
+
+Reliability Design patterns :fault tolerance 
+
+ -Circuit Breaker
+ -Bulk Head
+ -Rate Limiter
+ -Retry
+ -TimeLitmiter
+ -Cache
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Service Communications in network and its Problems:
+...................................................
+
+Services are going to talk each other.
+
+If they want to talk, What services should know each other?
+
+ -Location
+     ip address
+
+In monolithic(traditional) deployment - ip address , ports are well known (hardcoded)
+but in containers/ cloud env which are highly dynamic.
+
+Where Micro services typically runs in a virtualized or containerized envs , locations are highly.
+
+Services need to be registered some where and others services will ask registered location, that , hey give me that service
+
+Service Registry and Discovery Pattern:
+.......................................
+Service Registry:
+  -database - stores service informations
+
+Service Discovery:
+  locating services from the service registry
+
+Types of Service discovery:
+ -Client Side Service Discovery
+ -Server Side Service Discovery
+.............................................................................................
+.............................................................................................
+
+Data Management :
+
+ A Service need to store data in data sources - Database
+  
+Database Per Service.
+
+ FiberOpticService
+Each service has its own schema. 
+you can have more than one tables per service
+
+Database: 
+  Collection of tables,views,other objects
+
+Shared Database:
+  Sharing db for more than one services .
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Service Communication and Data Management
+
+How to implement Transactions In Microservices?
+
+It is very very difficult to implement and track transactions across multiple services.
+
+Transactional Designpattern:
+
+1.2PC  - 2 Phase Commit
+
+2.Saga
+    -EDA - Event Driven Architectures
+  Saga Implementation
+	-Choreography
+        -Orchestration
+//////////////////////////////////////////////////////////////////////////////////////////
+
+.............................................................................................
+
+Data Management :
+
+ A Service need to store data in data sources - Database
+  
+Database Per Service.
+
+ FiberOpticService
+Each service has its own schema. 
+you can have more than one tables per service
+
+Database: 
+  Collection of tables,views,other objects
+
+Shared Database:
+  Sharing db for more than one services .
+
+
+Service Communication and Data Management
+
+How to implement Transactions In Microservices?
+
+It is very very difficult to implement and track transactions across multiple services.
+
+Transactional Designpattern:
+
+1.2PC  - 2 Phase Commit
+
+2.Saga
+    -EDA - Event Driven Architectures
+  Saga Implementation
+	-Choreography
+        -Orchestration
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Micro Services Management Patterns:
+
+1.Log Managements
+     Distributed/Centralized log management.
+ 
+Tools:
+   Graylog - mongodb,ES,Graylog
+   ELK Stack  - ES,Logstash,kibana
+   EFK Stack  - ES,Fluentd,Kibana
+
+
+2.Application Metrics
+     To monitor Application behaviours
+
+Tools:
+   Prometheus
+   AWS Cloud Watch
+
+3.Auditing
+    User auditing,application auditing - Performance
+    Record User activties in a databse
+
+4.Distributed Tracing /Tracking
+   If i want to track service calls
+    A -->B ---C -- Something
+   You can Track Exception Hierachies
+  
+ Open zipkin
+ Open Tracing
+
+5.Health Check Api
+    To test health of apis,infra components.
+
+ Some implemetations provides health endpoints where you can get helath metrics information
+that can be feed to tools 
+
+-Prometheus
+////////////////////////////////////////////////////////////////////////////////////////////
+				Micro Services - Implementations
+............................................................................................
+
+Microservices is langugage,platform,os independant. 
+
+Java:
+ -Spring Cloud
+ -Quarkus
+ -Light4J
+ -Vertx
+ etc...
+
+Javascript : nodejs
+
+
+                                   Moleculer
+
+Progressive microservices framework for Node.js
+
+Moleculer is framework which has implemented most of common microservices design patterns.
+
+Moleculer features:
+
+1.Promise-based solution (async/await compatible)
+2.request-reply concept
+3.support event driven architecture with balancing
+4.built-in service registry & dynamic service discovery
+5.load balanced requests & events (round-robin, random, cpu-usage, latency, sharding)
+6.many fault tolerance features (Circuit Breaker, Bulkhead, Retry, Timeout, Fallback)
+7.plugin/middleware system
+8.support versioned services
+9.support Streams
+10.service mixins
+11.built-in caching solution (Memory, MemoryLRU, Redis)
+12.pluggable loggers (Console, File, Pino, Bunyan, Winston, Debug, Datadog, Log4js)
+13.pluggable transporters (TCP, NATS, MQTT, Redis, NATS Streaming, Kafka, AMQP 0.9, AMQP 1.0)
+14.pluggable serializers (JSON, Avro, MsgPack, Protocol Buffer, Thrift)
+15.pluggable parameter validator
+16.multiple services on a node/server
+17.master-less architecture, all nodes are equal
+18.parameter validation with fastest-validator
+19.built-in metrics feature with reporters (Console, CSV, Datadog, Event, Prometheus, StatsD)
+20.built-in tracing feature with exporters (Console, Datadog, Event, Jaeger, Zipkin)
+21.official API gateway, Database access and many other modules…
+
+https://moleculer.services/
+
+Moleculer setup:
+
+project creations;
+
+1.from begining like normal node application.
+2.moleculer cli- to setup realtime project with all artifacts.
+
+npm install moleculer
+
+
+Core concepts in Molecular:
+..........................
+
+1.Service
+ A service is a simple JavaScript module containing some part of a complex application. 
+ A service represents a biz logic in your application.
+
+2.Service Broker : == Spring Container
+ Service Broker is the heart of Moleculer.
+
+It is responsible for management and communication between services (local and remote). 
+
+3.node :
+ A node is a simple OS process running on a local or external network.
+ A single instance of a node can host one or many services.
+ node js platform - v8+libvu..
+
+Each node must have an instance of Service Broker.
+
+"Service Broker is one single Node instance - Node runtime"
+
+4.Transporter
+	Transporter is a communication bus that services use to exchange messages. 
+ It transfers events, requests and responses.
+
+5.Gateway
+     API Gateway exposes Moleculer services to end-users.
+ The gateway is a regular Moleculer service running a (HTTP, WebSockets, etc.) server. It handles the incoming requests, maps them into service calls, and then returns appropriate responses.
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Services:
+
+1.HTTP services
+   Services are exposed for outsideworld
+
+2.Back end services
+   Services are used to encasulate biz logics like database operations,any biz
+
+
+service names and file names:
+
+math.service.js
+hello.service.js
+
+
+service broker creation and start:
+
+const { ServiceBroker } = require('moleculer')
+
+//ServiceBroker is Moleculer Engine , on which only create services and deploy them.
+const broker = new ServiceBroker()
+
+function main() {
+    broker.start()
+        .then(() => {
+            console.log('Moleculer is ready to serve')
+        })
+        .catch(err => console.log(`Molculer failed to start ${err}`))
+}
+main()
+
+
+Create Service:
+
+-Service is object
+-Service represents a biz feature
+-Service object is created by broker.createService factory method
+-createService methods takes service schema as parameter.
+
+const { ServiceBroker } = require('moleculer')
+
+//ServiceBroker is Moleculer Engine , on which only create services and deploy them.
+const broker = new ServiceBroker()
+
+//Service
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello MicroService'
+        }
+    }
+})
+
+
+
+
+function main() {
+    broker.start()
+        .then(() => {
+            console.log('Moleculer is ready to serve')
+            //here only we can call service methods
+            broker.call('hello.sayHello')
+                .then(response => console.log(response))
+                .catch(err => console.log(`Service call is failed ${err}`))
+        })
+        .catch(err => console.log(`Molculer failed to start ${err}`))
+}
+main()
+
+Refactoring Code:
+async function main() {
+    try {
+        await broker.start()
+        const response = await broker.call('hello.sayHello')
+        console.log(response)
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+main()
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+const { ServiceBroker } = require('moleculer')
+
+//ServiceBroker is Moleculer Engine , on which only create services and deploy them.
+const broker = new ServiceBroker()
+
+//Service
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello(ctx) {
+            const { message,name } = ctx.params;
+            return `${message} ${name}`
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        let response = await broker.call('hello.sayHello', { message: 'Hello' ,name:'Subramanian' })
+        console.log(response)
+        response =await broker.call('hello.sayHello', { message: 'Hello' ,name:'Microservices' })
+        console.log(response)
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+main()
+/////////////////////////////////////////////////////////////////////////////////////////////
+const { ServiceBroker } = require('moleculer');
+const { log } = console;
+
+const broker = new ServiceBroker();
+
+//multiple service methods
+broker.createService({
+    name: 'profile',
+    actions: {
+        findAll() {
+            return 'Profile findall'
+        },
+        save() {
+            return 'profile save'
+        },
+        remove() {
+            return 'profile remove'
+        }
+
+    }
+});
+
+
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        response= await broker.call('profile.findAll')
+        log(`${response}`)
+        response= await broker.call('profile.save')
+        log(`${response}`)
+        response= await broker.call('profile.remove')
+        log(`${response}`)
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+Single Broker Multiple Services:
+................................
+
+const { ServiceBroker } = require('moleculer');
+const { log } = console;
+const broker = new ServiceBroker();
+
+//Hello Service
+broker.createService({
+    name: 'hello',
+    actions: {
+        //define biz api of that service
+        sayHello() {
+            return 'Hello,Molecular'
+        }
+    }
+});
+
+broker.createService({
+    name: 'hai',
+    actions: {
+        //define biz api of that service
+        sayHai() {
+            return 'Hai,Molecular'
+        }
+    }
+});
+
+
+broker.createService({
+    name: 'greet',
+    actions: {
+        //define biz api of that service
+        sayGreet() {
+            return 'Greet,Molecular'
+        }
+    }
+});
+
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        response= await broker.call('hello.sayHello')
+        log(`${response}`)
+        response= await broker.call('hai.sayHai')
+        log(`${response}`)
+        response= await broker.call('greet.sayGreet')
+        log(`${response}`)
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+How to define meta information for service methods?
+
+-validation
+-caching
+
+eg : 
+ sayHello(ctx){
+    ctx.params.name
+ }
+here i want to enable validation rule for name that
+ name must be string.
+
+Without meta information
+  actions: {
+        //define biz api of that service
+        sayGreet() {
+            return 'Greet,Molecular'
+        }
+    }
+
+With meta information
+
+actions: {
+
+  sayGreet : {
+     
+ 	  //validation behaviour
+            params: {
+                message: "string"       
+            },
+            //logic, inside a method called handler
+            handler(ctx) {
+               return 'Greet'
+            } 
+
+  }
+
+}
+
+eg:
+const { ServiceBroker } = require('moleculer');
+const { log } = console;
+const broker = new ServiceBroker();
+
+
+broker.createService({
+    name: 'math',
+    actions: {
+        add: {
+            params: {
+                a: "number",
+                b: "number"
+            },
+            handler(ctx) {
+                const { a, b } = ctx.params;
+                return a + b;
+            }
+        }
+    }
+
+})
+
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        response = await broker.call('math.add', { a: 10, b: 10 })
+        log(response);
+        response = await broker.call('math.add', { a: "10", b: 10 })
+        log(response);
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Service Types:
+.............
+
+1.Back end services
+------------------------
+1.local services
+2.remote services
+3.public services
+4.private services
+---------------------------------
+Front end services
+
+1.HTTP services
+
+
+
+1.local services :
+ services are written and running on a "Single Service Broker  and Node".
+
+how local services are communicating? service calls.
+
+Service Communication:
+
+how local services are communicating? service calls.
+
+how to call service?
+
+1.broker.call -  outside service
+2.ctx.call -  service to service  
+
+-Local Service Communication:
+............................
+
+Within Node/Broker.
+
+const { ServiceBroker } = require('moleculer');
+const { log } = console;
+
+const broker = new ServiceBroker();
+
+//calculator service
+broker.createService({
+    name: 'calculator',
+    actions: {
+        add: {
+            params: {
+                a: 'number',
+                b: 'number'
+            },
+            async handler(ctx) {
+                const { a, b } = ctx.params;
+                //service call
+                // ctx.call('adder.add', { a: a, b: b })
+                let res = await ctx.call('adder.add', { a, b })
+                return res
+            }
+
+        }
+    }
+})
+
+//adder service
+broker.createService({
+    name: 'adder',
+    actions: {
+        add: {
+            params: {
+                a: 'number',
+                b: 'number'
+            },
+            handler(ctx) {
+                const { a, b } = ctx.params;
+                return a + b;
+            }
+
+        }
+    }
+})
+
+
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        response = await broker.call('calculator.add', { a: 10, b: 20 })
+        log(response)
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+////////////////////////////////////////////////////////////////////////////////////////////
+
+REPL Mode: Read Evualate Print Loop : Interactive Command Line.
+
+REPL feature provide by node .
+
+>node
+Welcome to Node.js v14.17.0.
+Type ".help" for more information.
+> .help
+.break    Sometimes you get stuck, this gets you out
+.clear    Alias for .break
+.editor   Enter editor mode
+.exit     Exit the REPL
+.help     Print this help message
+.load     Load JS from a file into the REPL session
+.save     Save all evaluated commands in this REPL session to a file
+
+Press Ctrl+C to abort current expression, Ctrl+D to exit the REPL
+> .clear
+> a =20
+20
+> b=90
+90
+> c = a + b
+110
+>
+
+molecular provides REPL Mode.
+
+For dev testing.
+
+if i want to test a service with various different parameters during runtime.
+if i want to adminster services
+
+>npm install moleculer-repl --save-dev
+
+
+Uses :
+
+- interactive service testing.
+- for monitoring services,actions ; administrative tasks.
+
+
+Service calls in repl prompt.
+ $ call "adder.add"  --a 10 --b 20
+
+mol $ help
+
+  Commands:
+
+    help [command...]                                          Provides help for a given command.
+    q                                                          Exit application
+    actions [options]                                          List of actions
+    bench [options] <action> [jsonParams] [meta]               Benchmark a service
+    broadcast <eventName>                                      Broadcast an event
+    broadcastLocal <eventName>                                 Broadcast an event locally
+    cache keys [options]                                       List keys of cache entries
+    cache clear [pattern]                                      Clear cache entries
+    call [options] <actionName> [jsonParams] [meta]            Call an action
+    dcall [options] <nodeID> <actionName> [jsonParams] [meta]  Direct call an action
+    clear [pattern]                                            Clear cache entries
+    cls                                                        Clear console
+    destroy <serviceName> [version]                            Destroy a local service
+    emit <eventName>                                           Emit an event
+    env                                                        List of environment variables
+    events [options]                                           List of event listeners
+    info                                                       Information about broker
+    load <servicePath>                                         Load a service from file
+    loadFolder <serviceFolder> [fileMask]                      Load all services from folder
+    metrics [options]                                          List metrics
+    nodes [options]                                            List of nodes
+    services [options]                                         List of services
+
+
+Molecular Provides two types of services
+
+1.$node : built in service
+ -for administrative service
+
+2.services are created by application dev.
+.............................................................................................
+
+					Remote Services
+				     (Distributed Services)
+.............................................................................................
+
+Remote Services
+-Services are located across the nodes.
+-nodes can be the same machine or different machines, or cloud.
+
+
+Steps:
+1.main service
+
+services/remotemain.service.js
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-MainServer',
+    transporter: "nats://localhost:4222"
+});
+
+broker.createService({
+    name: 'main',
+    actions: {
+        async begin(ctx) {
+            const { a, b } = ctx.params
+            let res = await ctx.call('remote1.calculate', { a, b })
+            console.log(`Result Got From Remote Services ${res}`)
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+services/remote1.service.js
+
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-RemoteNode-1'
+});
+
+broker.createService({
+    name: 'remote1',
+    actions: {
+        async calculate(ctx) {
+            const { a, b } = ctx.params
+            return await ctx.call('remote2.calculate', { a, b })
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+services/remote2.service.js
+
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-RemoteNode-2'
+});
+
+broker.createService({
+    name: 'remote2',
+    actions: {
+        async calculate(ctx) {
+            const { a, b } = ctx.params
+            return a + b;
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+
+2.Open three command prompt and run the services
+
+2.1.C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted>node services/remotemain.service.js
+
+
+
+2.2.C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted>node services/remote1.service.js
+
+2.3.C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted>node services/remote2.service.js
+
+3.start service communication from remotemain.service.js
+
+mol $ call "main.begin" --a 10 --b 20
+>> Call 'main.begin' with params: { a: 10, b: 20 }
+[2021-07-01T09:09:44.788Z] WARN  IBM-MainServer/BROKER: Service 'remote1.calculate' is not registered.
+Result Got From Remote Services [object Promise]
+>> Execution time:5ms
+>> Response:
+undefined
+mol $ (node:12900) UnhandledPromiseRejectionWarning: ServiceNotFoundError: Service 'remote1.calculate' is not found.
+    at ServiceBroker.findNextActionEndpoint (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\service-broker.js:1034:13)
+    at ServiceBroker.call (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\service-broker.js:1083:26)
+    at Context.call (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\context.js:289:23)
+    at Service.begin (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\services\remotemain.service.js:12:27)
+    at C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\utils.js:185:22
+    at ServiceBroker.timeoutMiddleware (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\timeout.js:35:14)
+    at ServiceBroker.fallbackMiddleware (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\fallback.js:29:11)
+    at ServiceBroker.errorHandlerMiddleware (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\error-handler.js:14:10)
+    at ServiceBroker.call (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\service-broker.js:1098:31)
+    at call (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer-repl\src\commands\call.js:90:9)
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12900) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 3)
+(node:12900) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+
+Why the above error?
+
+-Service not able to locate the other service, since other services are running in different 
+nodes
+.............................................................................................
+					 Networking
+.............................................................................................
+
+In order to enable Remote Service communications , we need Message Brokers 
+
+
+Transporters:
+
+-Transporter is an important module if you are running services on multiple nodes. 
+
+-Transporter communicates with other nodes. 
+
+-It transfers events, calls requests and processes responses …etc. 
+
+-If a service runs on multiple instances on different nodes, the requests will be load-balanced among live nodes.
+
+
+Transports:
+............
+
+Built-in transporters
+
+TCP transporter
+NATS Transporter
+Redis Transporter
+MQTT Transporter
+AMQP Transporter
+Kafka Transporter
+NATS Streaming (STAN) Transporter
+
+
+Steps;
+
+1.you have to run Transporter broker software
+
+ like redis server or nats server ,AMQP server.....
+
+NATS: Bridge :https://nats.io/download/
+
+docker run  --name nats-main -p 4222:4222 -p 6222:6222 -p 8222:8222 nats
+
+
+2.you have to install transport adapter/driver
+
+npm install nats@1.4.12 --save
+
+
+
+3.Configure nats transporter with broker
+
+    transporter: "nats://localhost:4222"
+
+>node services/remotemain.service.js
+[2021-07-01T09:35:40.787Z] INFO  IBM-MainServer/BROKER: Moleculer v0.14.14 is starting...
+[2021-07-01T09:35:40.790Z] INFO  IBM-MainServer/BROKER: Namespace: <not defined>
+[2021-07-01T09:35:40.791Z] INFO  IBM-MainServer/BROKER: Node ID: IBM-MainServer
+[2021-07-01T09:35:40.793Z] INFO  IBM-MainServer/REGISTRY: Strategy: RoundRobinStrategy
+[2021-07-01T09:35:40.794Z] INFO  IBM-MainServer/REGISTRY: Discoverer: LocalDiscoverer
+[2021-07-01T09:35:40.809Z] INFO  IBM-MainServer/BROKER: Serializer: JSONSerializer
+[2021-07-01T09:35:40.828Z] INFO  IBM-MainServer/BROKER: Validator: FastestValidator
+[2021-07-01T09:35:40.831Z] INFO  IBM-MainServer/BROKER: Registered 13 internal middleware(s).
+[2021-07-01T09:35:40.835Z] INFO  IBM-MainServer/TRANSPORTER: NATS lib version: 1.4.12
+[2021-07-01T09:35:40.835Z] INFO  IBM-MainServer/BROKER: Transporter: NatsTransporter
+[2021-07-01T09:35:40.856Z] INFO  IBM-MainServer/TRANSIT: Connecting to the transporter...
+[2021-07-01T09:35:40.910Z] INFO  IBM-MainServer/TRANSPORTER: NATS client v1 is connected.
+[2021-07-01T09:35:40.924Z] INFO  IBM-MainServer/REGISTRY: Node 'IBM-RemoteNode-2' connected.
+[2021-07-01T09:35:40.926Z] INFO  IBM-MainServer/REGISTRY: Node 'IBM-RemoteNode-1' connected.
+[2021-07-01T09:35:41.426Z] INFO  IBM-MainServer/REGISTRY: '$node' service is registered.
+[2021-07-01T09:35:41.427Z] INFO  IBM-MainServer/REGISTRY: 'main' service is registered.
+[2021-07-01T09:35:41.428Z] INFO  IBM-MainServer/$NODE: Service '$node' started.
+[2021-07-01T09:35:41.429Z] INFO  IBM-MainServer/MAIN: Service 'main' started.
+[2021-07-01T09:35:41.435Z] INFO  IBM-MainServer/BROKER: ✔ ServiceBroker with 2 service(s) is started successfully in 580ms.
+mol $ call "main.begin" --a 10 --b 20
+>> Call 'main.begin' with params: { a: 10, b: 20 }
+Result Got From Remote Services 30
+>> Execution time:12ms
+>> Response:
+undefined
+mol $ call "main.begin" --a 10 --b 70
+>> Call 'main.begin' with params: { a: 10, b: 70 }
+Result Got From Remote Services 80
+>> Execution time:12ms
+>> Response:
+undefined
+mol $
+
+
+
+
+
