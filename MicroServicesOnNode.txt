@@ -1330,10 +1330,497 @@ Built-in strategies
  ->Latency-based strategy
 	This strategy selects a node which has the lowest latency, measured by periodic ping commands. Notice that the strategy only ping one of nodes from a single host.
 
+///////////////////////////////////////////////////////////////////////////////////////////
+
+How to implement load balancing?
+
+1.You need to clone the services n- number of times.
+  lets say i have service called "adder" service , i need to run adder service 2 instances
+
+2.Each service is going to run in different nodes. Each node must be identified quickly.
+  Node name should not be hardcoded.
+  In Genernal Node Id would be  - computername_processId
+  
+
+Steps:
+
+1.Run remote2 service two times
+open two cmd prompt and run.
+
+>node services/remote2.service.js
+>node services/remote2.service.js
+
+
+
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    // nodeID: 'IBM-RemoteNode-2',
+    transporter: "nats://localhost:4222",
+    registry: {
+        strategy:"Random"
+        //discoverer:'Redis'
+     //   discoverer: "redis://localhost:6379"
+    }
+
+});
+
+broker.createService({
+    name: 'remote2',
+    actions: {
+        async calculate(ctx) {
+            const { a, b } = ctx.params
+             return `${a + b} - ${broker.nodeID} `;
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+
+
+2021-07-02T05:00:26.207Z] INFO  laptop-r2tggfdl-11556/BROKER: Moleculer v0.14.14 is starting...
+[2021-07-02T05:00:26.209Z] INFO  laptop-r2tggfdl-11556/BROKER: Namespace: <not defined>
+[2021-07-02T05:00:26.210Z] INFO  laptop-r2tggfdl-11556/BROKER: Node ID: laptop-r2tggfdl-11556
+[2021-07-02T05:00:26.211Z] INFO  laptop-r2tggfdl-11556/REGISTRY: Strategy: RandomStrategy
+[2021-07-02T05:00:26.212Z] INFO  laptop-r2tggfdl-11556/REGISTRY: Discoverer: LocalDiscoverer
+[2021-07-02T05:00:26.219Z] INFO  laptop-r2tggfdl-11556/BROKER: Serializer: JSONSerializer
+[2021-07-02T05:00:26.230Z] INFO  laptop-r2tggfdl-11556/BROKER: Validator: FastestValidator
+[2021-07-02T05:00:26.233Z] INFO  laptop-r2tggfdl-11556/BROKER: Registered 13 internal middleware(s).
+[2021-07-02T05:00:26.234Z] INFO  laptop-r2tggfdl-11556/TRANSPORTER: NATS lib version: 1.4.12
+[2021-07-02T05:00:26.235Z] INFO  laptop-r2tggfdl-11556/BROKER: Transporter: NatsTransporter
+[2021-07-02T05:00:26.244Z] INFO  laptop-r2tggfdl-11556/TRANSIT: Connecting to the transporter...
+[2021-07-02T05:00:26.271Z] INFO  laptop-r2tggfdl-11556/TRANSPORTER: NATS client v1 is connected.
+[2021-07-02T05:00:26.279Z] INFO  laptop-r2tggfdl-11556/REGISTRY: Node 'IBM-MainServer' connected.
+[2021-07-02T05:00:26.280Z] INFO  laptop-r2tggfdl-11556/REGISTRY: Node 'laptop-r2tggfdl-9556' connected.
+[2021-07-02T05:00:26.282Z] INFO  laptop-r2tggfdl-11556/REGISTRY: Node 'IBM-RemoteNode-1' connected.
+[2021-07-02T05:00:26.780Z] INFO  laptop-r2tggfdl-11556/REGISTRY: '$node' service is registered.
+[2021-07-02T05:00:26.781Z] INFO  laptop-r2tggfdl-11556/REGISTRY: 'remote2' service is registered.
+[2021-07-02T05:00:26.784Z] INFO  laptop-r2tggfdl-11556/$NODE: Service '$node' started.
+[2021-07-02T05:00:26.786Z] INFO  laptop-r2tggfdl-11556/REMOTE2: Service 'remote2' started.
+[2021-07-02T05:00:26.791Z] INFO  laptop-r2tggfdl-11556/BROKER: ✔ ServiceBroker with 2 service(s) is started successfully in 548ms.
+
+/////////////////////
+
+2.node services/remote1.service.js
+
+
+3.node services/remotemain.service.js
+>> Call 'main.begin' with params: { a: 10, b: 20 }
+Result Got From Remote Services 30 - laptop-r2tggfdl-11556
+>> Execution time:4ms
+>> Response:
+undefined
+mol $ call "main.begin" --a 10 --b 20
+>> Call 'main.begin' with params: { a: 10, b: 20 }
+Result Got From Remote Services 30 - laptop-r2tggfdl-9556
+>> Execution time:7ms
+>> Response:
+undefined
+mol $
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+High Availablity:
+
+ Making Services  always available, to reduce down time. 
+
+ How to achive highly available?
+
+  You need to scale, and load balance.
+...........................................................................................
+				   Fault Management : Reliability
+...........................................................................................
+
+Distributed Env is subject to fail.
+
+Failures in Distributed Computing is always expected.
+
+What could be Failures?
+
+For a Caller (Who is requesting service/who is calling Service) Point of View.
+
+-Timeout
+
+    Service-X  is calling Service-Y
+
+1.You may get Result(succees/errors) "on time".
+
+2.YOu may not get any thing beyond time.
+
+3.Timeout defines deadlines for services
+
+
+eg:
+   Service-X expects result in 500 ms from Service-Y, What if Service-Y not able to give result within that time lime , Service-Y will throw TimeoutException.
+
+Now you need to decide how to Handle TimeoutException?
+
+ -throw exception and handle it
+ -You can have alternate fallback api to return result to the caller.
+
+
+Fault Management Implementations In Moleculer:
+..............................................
+
+1.Timeout.
+
+Fault Management algorthims can be defined in two places
+
+1.At Broker Level
+ -if you set fault management algorthims at ServiceBroker level,those settings will be appliable for the entier application.
+
+let broker = new ServiceBroker({
+    requestTimeout: 5 * 1000 // in milliseconds
+
+})
+
+
+
+2.At Service Level
+
+ Sometimes if you want to override default settings
+
+ broker.call("posts.find", {}, { timeout: 3000 });
+ ctx.call("posts.find", {}, { timeout: 3000 });
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Caller Service  Expects , That data should be returned from Callee in 1000 ms , but Callee
+returns Data in 4000ms. , Timeout Exception will be thrown.
+
+
+Steps: 1 : caller Service
+
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-MainServer',
+    transporter: "nats://localhost:4222",
+
+    registry: {
+        //discoverer:'Redis'
+       // discoverer: "redis://localhost:6379"
+    }
+});
+
+broker.createService({
+    name: 'main',
+    actions: {
+        async begin(ctx) {
+            const { a, b } = ctx.params
+            let res = await ctx.call('remote1.calculate', { a, b },{
+                    timeout: 1000
+             })
+            console.log(`Result Got From Remote Services ${res}`)
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+
+Step 2: Callee:
+................
+
+Callee Level-1 :
+
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-RemoteNode-1',
+    transporter: "nats://localhost:4222",
+    registry: {
+        //discoverer:'Redis'
+       // discoverer: "redis://localhost:6379"
+    }
+
+});
+
+broker.createService({
+    name: 'remote1',
+    actions: {
+        async calculate(ctx) {
+            const { a, b } = ctx.params
+            return await ctx.call('remote2.calculate', { a, b })
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+
+Callee-Level 2
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    // nodeID: 'IBM-RemoteNode-2',
+    transporter: "nats://localhost:4222",
+    registry: {
+        strategy:"Random"
+        //discoverer:'Redis'
+     //   discoverer: "redis://localhost:6379"
+    },
+    requestTimeout: 5 * 1000 // in milliseconds
+
+});
+
+broker.createService({
+    name: 'remote2',
+    actions: {
+        async calculate(ctx) {
+            const { a, b } = ctx.params
+            // return `${a + b} - ${broker.nodeID} `;
+             return new Promise((resolve,reject)=>{
+                 setTimeout(resolve,4000,`${a + b} - ${broker.nodeID} `)
+             })
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+Out Come:
+
+node services/remotemain.service.js
+[2021-07-02T05:37:00.812Z] INFO  IBM-MainServer/BROKER: Moleculer v0.14.14 is starting...
+[2021-07-02T05:37:00.814Z] INFO  IBM-MainServer/BROKER: Namespace: <not defined>
+[2021-07-02T05:37:00.814Z] INFO  IBM-MainServer/BROKER: Node ID: IBM-MainServer
+[2021-07-02T05:37:00.815Z] INFO  IBM-MainServer/REGISTRY: Strategy: RoundRobinStrategy
+[2021-07-02T05:37:00.816Z] INFO  IBM-MainServer/REGISTRY: Discoverer: LocalDiscoverer
+[2021-07-02T05:37:00.826Z] INFO  IBM-MainServer/BROKER: Serializer: JSONSerializer
+[2021-07-02T05:37:00.839Z] INFO  IBM-MainServer/BROKER: Validator: FastestValidator
+[2021-07-02T05:37:00.841Z] INFO  IBM-MainServer/BROKER: Registered 13 internal middleware(s).
+[2021-07-02T05:37:00.843Z] INFO  IBM-MainServer/TRANSPORTER: NATS lib version: 1.4.12
+[2021-07-02T05:37:00.844Z] INFO  IBM-MainServer/BROKER: Transporter: NatsTransporter
+[2021-07-02T05:37:00.861Z] INFO  IBM-MainServer/TRANSIT: Connecting to the transporter...
+[2021-07-02T05:37:00.900Z] INFO  IBM-MainServer/TRANSPORTER: NATS client v1 is connected.
+[2021-07-02T05:37:00.909Z] INFO  IBM-MainServer/REGISTRY: Node 'laptop-r2tggfdl-4416' connected.
+[2021-07-02T05:37:00.910Z] INFO  IBM-MainServer/REGISTRY: Node 'laptop-r2tggfdl-13180' connected.
+[2021-07-02T05:37:00.912Z] INFO  IBM-MainServer/REGISTRY: Node 'IBM-RemoteNode-1' connected.
+[2021-07-02T05:37:01.409Z] INFO  IBM-MainServer/REGISTRY: '$node' service is registered.
+[2021-07-02T05:37:01.410Z] INFO  IBM-MainServer/REGISTRY: 'main' service is registered.
+[2021-07-02T05:37:01.412Z] INFO  IBM-MainServer/$NODE: Service '$node' started.
+[2021-07-02T05:37:01.413Z] INFO  IBM-MainServer/MAIN: Service 'main' started.
+[2021-07-02T05:37:01.419Z] INFO  IBM-MainServer/BROKER: ✔ ServiceBroker with 2 service(s) is started successfully in 559ms.
+mol $ call "main.begin" --a 10 --b 20
+>> Call 'main.begin' with params: { a: 10, b: 20 }
+[2021-07-02T05:37:17.518Z] WARN  IBM-MainServer/BROKER: Request 'remote1.calculate' is timed out. { requestID: '5e20d57c-0694-4767-b120-34e478ad0023', nodeID: 'IBM-RemoteNode-1', timeout: 1000 }
+>> ERROR:
+RequestTimeoutError: Request is timed out when call 'remote1.calculate' action on 'IBM-RemoteNode-1' node.
+    at C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\timeout.js:42:14
+    at async Service.begin (C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\services\remotemain.service.js:18:23)
+Data:  { action: 'remote1.calculate', nodeID: 'IBM-RemoteNode-1' }
+mol $
+
+The above code  throws Timeout Exception.
+
+What if i dont want Timout Exception?
+
+  You need to set fallback.
+
+Fallback is a function gets called , if execption is Thrown.
+
+Fallback function may return data from "cache" Servers.
+
+
+broker.createService({
+    name: 'main',
+    actions: {
+        async begin(ctx) {
+            const { a, b ,timeout } = ctx.params
+            let res = await ctx.call('remote1.calculate', { a, b }, {
+               // timeout: 1000,
+                timeout:timeout,
+                fallbackResponse() {
+                    //return data from caching server
+                    return `The Result is From cachining Server ${0}`
+                }
+            })
+            console.log(`Result Got From Remote Services ${res}`)
+        }
+    }
+})
+
+Testing:
+mol $ call "main.begin" --a 10 --b 20 --timeout 2000
+>> Call 'main.begin' with params: { a: 10, b: 20, timeout: 2000 }
+[2021-07-02T05:49:21.958Z] WARN  IBM-MainServer/BROKER: Request 'remote1.calculate' is timed out. { requestID: '2d946322-4668-4df5-9c92-acd97ae48811', nodeID: 'IBM-RemoteNode-1', timeout: 2000 }
+[2021-07-02T05:49:21.960Z] WARN  IBM-MainServer/BROKER: The 'remote1.calculate' request is failed. Return fallback response. { requestID: '2d946322-4668-4df5-9c92-acd97ae48811', err: "Request is timed out when call 'remote1.calculate' action on 'IBM-RemoteNode-1' node." }
+Result Got From Remote Services The Result is From cachining Server 0
+>> Execution time:2s
+>> Response:
+undefined
+mol $ call "main.begin" --a 10 --b 20 --timeout 5000
+>> Call 'main.begin' with params: { a: 10, b: 20, timeout: 5000 }
+Result Got From Remote Services 30 - laptop-r2tggfdl-13180
+>> Execution time:4s
+>> Response:
+undefined
+mol $
+
+How to set Global Timeout from the caller side?
+
+
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-MainServer',
+    transporter: "nats://localhost:4222",
+    requestTimeout: 1000, // in milliseconds,
+
+    registry: {
+        //discoverer:'Redis'
+        // discoverer: "redis://localhost:6379"
+    }
+});
+
+broker.createService({
+    name: 'main',
+    actions: {
+        async begin(ctx) {
+            const { a, b ,timeout } = ctx.params
+            // let res = await ctx.call('remote1.calculate', { a, b }, {
+            //    // timeout: 1000,
+            //     timeout:timeout,
+            //     fallbackResponse() {
+            //         //return data from caching server
+            //         return `The Result is From cachining Server ${0}`
+            //     }
+            // })
+            //which uses global timeout
+             let res = await ctx.call('remote1.calculate', { a, b })
+            console.log(`Result Got From Remote Services ${res}`)
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+/////////////////////////////////////////////////////////////////////////////////////////////
+				Circuit Breaker
+.............................................................................................
+
+CircuitBreaker: 
+
+Automatically fail fast when execution repeatedly fails.
+
+CB is a state machine with three states:
+  CLOSED, OPEN, HALF_OPEN
+
+CLOSED : No exception,No Problm in the System.
+ if service is working fine, then cb state would be closed.
+
+OPEN:
+   if something went wrong, cb opens a cb, tries to trip , never allows further calls
+
+ Service A -----calls -----Service B
+
+ Cb allows serviceA to call Service B if no error/exception.
+
+ cb will never allow ServiceA to call Service B if exception is thrown.
+
+HALF_OPEN:
+   if service need to recover from failures to normal state  , cb will go to half_open state 
+
+ from half_open to Open :  still failures are there in the system
+ from half_open to closed : Recovered from failures, system is normal
+ 
+
+
+How to implement CB in Moleculer?
+
+1.Broker level : Global cb settings
+
+const broker = new ServiceBroker({
+    circuitBreaker: {
+        enabled: true,
+        threshold: 0.5,
+        minRequestCount: 20,
+        windowTime: 60, // in seconds
+        halfOpenTime: 5 * 1000, // in milliseconds
+        check: err => err && err.code >= 500
+    }
+});
+
+enable: Enable feature
+threshold	
+   Number	0.5	
+   Threshold value. 0.5 means that 50% should be failed for tripping.
+minRequestCount	
+   Number	20	
+  Minimum request count. Below it, CB does not trip (It never goes to open state)
+
+windowTime	
+   Number	60	
+ Number of seconds for time window.
+
+halfOpenTime	
+  Number	10000
+ Number of milliseconds to switch from open to half-open state
+
+check	Function	err && err.code >= 500	A function to check failed requests.
+
+
+2.Service level : Only for particular services
+
+broker.createService({
+{
+    name: "users",
+    actions: {
+        create: {
+            circuitBreaker: {
+                // All CB options can be overwritten from broker options.
+                threshold: 0.3,
+                windowTime: 30
+            },
+            handler(ctx) {}
+        }
+    }
+};
+})
+
+  
+  
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
 
 
 

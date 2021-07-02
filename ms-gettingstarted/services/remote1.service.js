@@ -5,7 +5,7 @@ const broker = new ServiceBroker({
     transporter: "nats://localhost:4222",
     registry: {
         //discoverer:'Redis'
-        discoverer: "redis://localhost:6379"
+       // discoverer: "redis://localhost:6379"
     }
 
 });
@@ -14,8 +14,8 @@ broker.createService({
     name: 'remote1',
     actions: {
         async calculate(ctx) {
-            const { a, b } = ctx.params
-            return await ctx.call('remote2.calculate', { a, b })
+            const { a, b ,invocationNumber } = ctx.params
+            return await ctx.call('remote2.calculate', { a, b,invocationNumber })
         }
     }
 })
