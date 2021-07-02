@@ -1797,9 +1797,821 @@ broker.createService({
     }
 };
 })
+//////////////////////////////////////////////////////////////////////////////////////////////
 
-  
-  
+Steps:
+
+1.services/remotemain.service.js
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    nodeID: 'IBM-MainServer',
+    transporter: "nats://localhost:4222",
+    // requestTimeout: 1000, // in milliseconds,
+    circuitBreaker: {
+        enabled: true,
+        threshold: 0.1,
+        minRequestCount: 1,
+        windowTime: 60, // in seconds
+        halfOpenTime: 5 * 1000, // in milliseconds
+        check: err => {
+            console.log('check function -Main')
+            console.log(err)
+            return err && err.code >= 500
+        }
+    },
+    registry: {
+        //discoverer:'Redis'
+        // discoverer: "redis://localhost:6379"
+    }
+});
+
+broker.createService({
+    name: 'main',
+    events: {
+        "$circuit-breaker.opened"(opened) {
+            console.log("main CB open created -Main service:", opened.nodeID ,opened.action);
+        },
+        "$circuit-breaker.closed"(opened) {
+            console.log("main CB closed created -Main service:", opened.nodeID ,opened.action);
+        },
+        "$circuit-breaker.half-opened"(opened) {
+            console.log("main CB Half created -Main service:", opened.nodeID ,opened.action);
+        }
+       
+    },
+    actions: {
+        // async begin(ctx) {
+        //     //  const { a, b ,timeout } = ctx.params
+        //     const { a, b, invocationNumber } = ctx.params
+        //     // let res = await ctx.call('remote1.calculate', { a, b }, {
+        //     //    // timeout: 1000,
+        //     //     timeout:timeout,
+        //     //     fallbackResponse() {
+        //     //         //return data from caching server
+        //     //         return `The Result is From cachining Server ${0}`
+        //     //     }
+        //     // })
+        //     //which uses global timeout
+        //     let res = await ctx.call('remote1.calculate', { a, b, invocationNumber })
+        //     console.log(`Result Got From Remote Services ${res}`)
+        // }
+        begin: {
+            circuitBreaker: {
+                // All CB options can be overwritten from broker options.
+                threshold: 0.0,
+                windowTime: 30
+            },
+            fallback: (ctx, err) => `Data From Caching Server ${0}`,
+            async handler(ctx) {
+                const { a, b, invocationNumber } = ctx.params
+                let res = await ctx.call('remote1.calculate', { a, b, invocationNumber })
+                console.log(`Result Got From Remote Services ${res}`)
+
+            }
+
+        }
+
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+services/remote2.service.js
+const { ServiceBroker } = require('moleculer');
+
+const broker = new ServiceBroker({
+    // nodeID: 'IBM-RemoteNode-2',
+    transporter: "nats://localhost:4222",
+    registry: {
+        strategy: "Random"
+        //discoverer:'Redis'
+        //   discoverer: "redis://localhost:6379"
+    },
+    requestTimeout: 5 * 1000, // in milliseconds
+    circuitBreaker: {
+        enabled: true,
+        threshold: 0.1,
+        minRequestCount: 1,
+        windowTime: 60, // in seconds
+        halfOpenTime: 5 * 1000, // in milliseconds
+        check: err => {
+            console.log('check function-service2')
+            return err && err.code >= 500
+        }
+    }
+});
+
+broker.createService({
+    name: 'remote2',
+    events: {
+        "$circuit-breaker.opened"(opened) {
+            console.log("remote2 : CB open created -Main service:", opened.nodeID ,opened.action);
+        },
+        "$circuit-breaker.closed"(opened) {
+            console.log("remote2 : CB closed created -Main service:", opened.nodeID ,opened.action);
+        },
+        "$circuit-breaker.half-opened"(opened) {
+            console.log("remote2 : CB Half created -Main service:", opened.nodeID ,opened.action);
+        }
+       
+    },
+    actions: {
+        async calculate(ctx) {
+            const { a, b, invocationNumber } = ctx.params
+            // // return `${a + b} - ${broker.nodeID} `;
+            return new Promise((resolve, reject) => {
+                //setTimeout(resolve,4000,`${a + b} - ${broker.nodeID} `)
+                if (invocationNumber === 10) {
+                    setTimeout(reject, 4000, `Something went wrong`)
+                } else {
+                    setTimeout(resolve, 4000, `${a + b} - ${broker.nodeID} `)
+                }
+            })
+        }
+    }
+})
+
+async function init() {
+    await broker.start()
+    broker.repl()
+}
+init();
+
+
+
+output:
+>> Call 'main.begin' with params: { a: 10, b: 10, invocationNumber: 10 }
+check function -Main
+MoleculerError: Something went wrong
+    at C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\error-handler.js:17:12 {
+  code: 500,
+  type: undefined,
+  data: undefined,
+  retryable: false,
+  nodeID: 'laptop-r2tggfdl-20672'
+}
+check function -Main
+MoleculerError: Something went wrong
+    at C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\error-handler.js:17:12 {
+  code: 500,
+  type: undefined,
+  data: undefined,
+  retryable: false,
+  nodeID: 'laptop-r2tggfdl-20672'
+}
+[2021-07-02T07:49:52.916Z] WARN  IBM-MainServer/MAIN: The 'main.begin' request is failed. Return fallback response. { requestID: '719df089-01e0-446e-9f47-f2284cfee860', err: 'Something went wrong' }
+>> Execution time:4s
+>> Response:
+'Data From Caching Server 0'
+mol $ call "main.begin" --a 10 --b 10 --invocationNumber 10
+>> Call 'main.begin' with params: { a: 10, b: 10, invocationNumber: 10 }
+check function -Main
+MoleculerError: Something went wrong
+    at C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\error-handler.js:17:12 {
+  code: 500,
+  type: undefined,
+  data: undefined,
+  retryable: false,
+  nodeID: 'laptop-r2tggfdl-20656'
+}
+check function -Main
+MoleculerError: Something went wrong
+    at C:\session\ibm\2021\june\nodemicroservices\ms-gettingstarted\node_modules\moleculer\src\middlewares\error-handler.js:17:12 {
+  code: 500,
+  type: undefined,
+  data: undefined,
+  retryable: false,
+  nodeID: 'laptop-r2tggfdl-20656'
+}
+[2021-07-02T07:50:00.132Z] WARN  IBM-MainServer/MAIN: The 'main.begin' request is failed. Return fallback response. { requestID: 'c17f9ddc-43df-465f-a374-2dd128b5391a', err: 'Something went wrong' }
+>> Execution time:4s
+>> Response:
+'Data From Caching Server 0'
+mol $ call "main.begin" --a 10 --b 10 --invocationNumber 14
+>> Call 'main.begin' with params: { a: 10, b: 10, invocationNumber: 14 }
+Result Got From Remote Services 20 - laptop-r2tggfdl-20672
+main CB open created -Main service: IBM-MainServer main.begin
+>> Execution time:4s
+>> Response:
+undefined
+mol $ main CB Half created -Main service: IBM-MainServer main.begin
+mol $ call "main.begin" --a 10 --b 10 --invocationNumber 14
+>> Call 'main.begin' with params: { a: 10, b: 10, invocationNumber: 14 }
+Result Got From Remote Services 20 - laptop-r2tggfdl-20656
+main CB closed created -Main service: IBM-MainServer main.begin
+>> Execution time:4s
+>> Response:
+undefined
+mol $
+//////////////////////////////////////////////////////////////////////////////////////////////
+                                 Event Driven Architecture- EDA
+.............................................................................................
+
+
+- A Service can emit event ,  Another service can listens events.
+
+- If nodes are running in different machines, we can send and receive messages via transporters
+
+Broker has a built-in event bus to support Event-driven architecture and to send events to local and remote services.
+
+
+Register Events:
+
+ {
+    name: "payment",
+    events: {
+        "order.created": {
+            // Register handler to the "other" group instead of "payment" group.
+            group: "other",
+            handler(payload) {
+                // ...
+            }
+        }
+    }
+}
+
+      "user.created"(user) {
+            console.log("User created:", user);
+        }
+
+Emit Event
+
+broker.emit("order.created", order);
+ctx.emit("order.created",order)
+
+broker.broadcast("config.changed", config);
+
+emit vs broadcast
+
+emit - one to one
+
+broadcast - one to many  - pub -sub
+
+
+Steps:
+
+services/producer.service.js
+
+const { ServiceBroker } = require('moleculer')
+
+const broker = new ServiceBroker({
+    transporter: "nats://localhost:4222"
+})
+
+broker.createService({
+    name: 'producer',
+    actions: {
+        sayHello(ctx) {
+            const { message } = ctx.params;
+            ctx.emit('producer.message', `${message} from ${ctx.nodeID}`);
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        broker.repl();
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+main()
+
+services/consumer.service.js
+const { ServiceBroker } = require('moleculer')
+
+const broker = new ServiceBroker({
+    transporter: "nats://localhost:4222"
+})
+
+broker.createService({
+    name: 'consumer',
+    events: {
+        "producer.message"(message) {
+            console.log(message)
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        broker.repl();
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+main()
+
+ol $ call "producer.sayHello" --message Hello
+>> Call 'producer.sayHello' with params: { message: 'Hello' }
+>> Execution time:4ms
+>> Response:
+undefined
+mol $
+
+[2021-07-02T09:19:53.695Z] INFO  laptop-r2tggfdl-16576/BROKER: ✔ ServiceBroker with 2 service(s) is started successfully in 546ms.
+mol $ Hello from laptop-r2tggfdl-3124
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+				Service inheritance
+
+Objective:
+
+ lets say i have a service having more methods, that i dont want to give in a service
+ i have service , that service apis , i want to reuse in service apis
+
+Service inheritance comes into place.
+
+In molecular , a service can inherit many services - multi level, for multi level, molcular uses a concept called "mixins".
+
+
+Use case:
+1.if you write any REST Controller.
+2.if you write database operations inside your service.
+
+
+How to write services in a different file
+How to do inheritance(service mixins) - mixin means multilevel 
+
+
+services/parent.service.js
+
+
+//service is exported
+module.exports = {
+    name: 'hello',
+    actions: {
+        //define biz api of that service
+        sayHello() {
+            return 'Hello,Moleculer'
+        }
+    }
+};
+
+
+services/child.service
+const { ServiceBroker } = require('moleculer');
+const hello = require('./parent.service');
+const { log } = console;
+const broker = new ServiceBroker();
+
+broker.createService({
+    name: 'greeter',
+    mixins: [hello], //service inheritance done
+    actions: {
+        sayGreet(){
+            return 'Hai'
+        }
+    }
+})
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        response = await broker.call('greeter.sayHello')
+        log(`${response}`)
+        response = await broker.call('greeter.sayGreet')
+        log(`${response}`)
+
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+/////////////////////////////////////////////////////////////////////////////////////////////
+					Methods
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+1.public methods
+2.private methods
+3.life cycle methods - broker cycle, service life cycle
+4.HTTP end point methods. 
+
+const { ServiceBroker } = require('moleculer');
+const { log } = console;
+const broker = new ServiceBroker();
+
+broker.createService({
+    name: 'math',
+    actions: {
+        //public methods
+        calculate(ctx) {
+          //calling private method
+          const result=this.add(ctx.params.a,ctx.params.b);
+          return result
+        }
+    },
+    //private methods
+    methods: {
+        add(a,b){
+            return a +b;
+        }
+    }
+});
+
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        //calling public methods
+        response = await broker.call('math.calculate', { a: 10, b: 20 });
+        log(response);
+
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+////////////////////////////////////////////////////////////////////////////////////////////
+LifeCycles:
+const { ServiceBroker } = require('moleculer');
+const broker = new ServiceBroker();
+
+broker.createService({
+    name: 'math',
+    actions: {
+        add(ctx) {
+            return ctx.params.a + ctx.params.b;
+        }
+    },
+    //life cycle methods
+    created() {
+        // Fired when the service instance created (with `broker.loadService` or `broker.createService`)
+        this.logger.info("created");
+    },
+
+    async started() {
+        // Fired when broker starts this service (in `broker.start()`)
+        this.logger.info("started");
+    },
+    async stopped() {
+        // Fired when broker stops this service (in `broker.stop()`)
+        this.logger.info("stoped");
+    }
+})
+
+
+async function init() {
+    try {
+        await broker.start();
+        let response;
+        response = await broker.call('math.add', { a: 1, b: 3 })
+        console.log(`response ${response}`)
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+/////////////////////////////////////////////////////////////////////////////////////////////
+				Moleculer Modules
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Moleculer offers lot of moudules called libs for extending the basic framework.
+
+-Web Features
+-Database features
+-Messaging features
+etc..........
+
+
+Mixin:
+   Help to integrate any plugin into our services
+
+Modules:
+ How integrate modules into our app, via "mixins" only.
+
+
+1.back end service
+  service which is having application logic.
+
+2.front end service /api gate way service.
+  Service which exposes apis are as "Rest End points".
+
+
+API GateWay:
+ - Front End through which only http requests are processed.
+
+
+								----Back End Services
+ HTTP Client------request------|--|--APIGATEWAY-----|REST Api-----{
+								----Back End Services
+
+
+moleculer-web:	Official API Gateway service.
+
+API GATE Implementation:
+Molecular provides lot of modules 
+
+1.moleculer-web
+
+moleculer-web is official gatway module, which is built on express.js
+
+const { ServiceBroker } = require("moleculer");
+const ApiGateWayService = require("moleculer-web");
+
+const broker = new ServiceBroker();
+
+// Load API Gateway
+broker.createService({
+    name: 'ApiGateWayService',
+    mixins: [ApiGateWayService],
+    settings: {
+        routes: [{
+            path: "/api",
+            whitelist: [
+                // Access any actions in 'hello' service
+                "hello.*",
+            ]
+        }]
+    }
+});
+
+broker.createService({
+    name: 'hello',
+    actions: {
+        //define biz api of that service
+        sayHello() {
+            return 'Hello,Molecular'
+        }
+    }
+});
+
+async function init() {
+    try {
+        await broker.start();
+        }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+
+//url mapping;
+//http://localhost:3000/api/hello/sayHello
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+URL Mapping Rules:
+
+1.ApiGateService -----Service Name ----ActionName mapping
+
+2.Aliases:
+.........
+You can use alias names instead of action names. You can also specify the method. 
+Otherwise it will handle every method types.
+
+broker.createService({
+    mixins: [ApiService],
+
+    settings: {
+        routes: [{
+            aliases: {
+                "GET users": "users.list",
+                "GET users/:id": "users.get",
+                "POST users": "users.create",
+                "PUT users/:id": "users.update",
+                "DELETE users/:id": "users.remove"
+            }
+        }]
+    }
+});
+
+eg:
+broker.createService({
+    name:'apigateway',
+    mixins:[ApiGateWayService],
+    settings: {
+        routes:[{
+            path:"/api",
+            aliases: {
+               "hello": "hello.sayHello"
+            }
+        }]
+    }
+});
+
+broker.createService({
+    name: 'hello',
+    actions: {
+        //define biz api of that service
+        sayHello() {
+            return 'Hello,Molecular'
+        }
+    }
+});
+
+async function init() {
+    try {
+        await broker.start();
+        }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+
+Short cut for CREATING CURD REST END Points:
+
+broker.createService({
+    mixins: [ApiService],
+
+    settings: {
+        routes: [{
+            aliases: {
+                "REST users": "users"
+            }
+        }]
+    }
+});
+
+if you follow the above one you need to have actions names
+
+To use this shorthand alias, create a service which has list, get, create, update and remove actions.
+const { ServiceBroker } = require("moleculer");
+const ApiGateWayService = require("moleculer-web");
+
+const broker = new ServiceBroker();
+
+////url mapping;
+//http://localhost:3000/api/hello/sayHello
+
+// Load API Gateway
+// broker.createService({
+//     name: 'ApiGateWayService',
+//     mixins: [ApiGateWayService],
+//     settings: {
+//         routes: [{
+//             path: "/api",
+//             whitelist: [
+//                 // Access any actions in 'hello' service
+//                 "hello.*",
+//             ]
+//         }]
+//     }
+// });
+
+
+//http://localhost:3000/api/hello/
+
+broker.createService({
+    name: 'apigateway',
+    mixins: [ApiGateWayService],
+    settings: {
+        routes: [{
+            path: "/api",
+            aliases: {
+                "hello": "hello.sayHello",  //here GET Is default
+                // "GET hello": "hello.sayHello",
+                "REST users": "users"
+            }
+        }]
+    }
+});
+
+broker.createService({
+    name: 'users',
+    actions: {
+        list: {
+            handler(ctx) {
+                return 'List'
+            }
+        },
+        get: {
+            handler(ctx) {
+                return 'Get'
+            }
+        },
+        create: {
+            handler(ctx) {
+                return 'create'
+            }
+        },
+        update: {
+            handler(ctx) {
+                return 'update'
+            }
+        },
+        remove: {
+            handler(ctx) {
+                return 'remove'
+            }
+        }
+    }
+});
+
+broker.createService({
+    name: 'hello',
+    actions: {
+        //define biz api of that service
+        sayHello() {
+            return 'Hello,Molecular'
+        }
+    }
+});
+
+async function init() {
+    try {
+        await broker.start();
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+..............................................................................................
+					Database Adapters
+..............................................................................................
+
+
+moleculer-db
+
+	Moleculer service to store entities in database
+
+Features
+default CRUD actions
+cached actions
+pagination support
+pluggable adapter (NeDB is the default memory adapter for testing & prototyping)
+official adapters for MongoDB, PostgreSQL, SQLite, MySQL, MSSQL.
+fields filtering
+populating
+encode/decode IDs
+entity lifecycle events for notifications
+
+const { ServiceBroker } = require("moleculer");
+const DbService = require("moleculer-db");
+
+const broker = new ServiceBroker();
+
+// Create a DB service for `user` entities
+broker.createService({
+    name: "users",
+    mixins: [DbService],
+
+    settings: {
+        fields: ["_id", "username", "name"]
+    },
+
+    afterConnected() {
+        // Seed the DB with ˙this.create`
+    }
+});
+
+async function init() {
+    try {
+        await broker.start();
+        await broker.call("users.create", {
+            username: "john",
+            name: "John Doe",
+            status: 1
+        })
+        const users = await broker.call("users.find");
+        console.log(users);
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+..............................................................................................
+
+                                       Moleculer Runner
+
+-Helper script to create realtime projects
+
+-all necessary configuration.
+  -GATEWAY
+  -Transporter
+  -Database integration
+  -Docker/Kb integration
+  -Monitoring tool integration
+
+
+Steps:
+
+1.install
+npm i -g moleculer-cli
+
+2.Create Project
+$ moleculer init project my-project
+
+
+
 
 
 

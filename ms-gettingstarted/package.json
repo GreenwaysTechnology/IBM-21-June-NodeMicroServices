@@ -11,6 +11,8 @@
   "dependencies": {
     "ioredis": "^4.27.6",
     "moleculer": "^0.14.14",
+    "moleculer-db": "^0.8.14",
+    "moleculer-web": "^0.10.0",
     "nats": "^1.4.12"
   },
   "devDependencies": {
